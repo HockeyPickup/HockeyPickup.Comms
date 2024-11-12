@@ -6,11 +6,11 @@
 
 HockeyPickup.Comms is an implementation of interacting with the HockeyPickup Platform via Communication (Email, Notifications, etc.). It's deployed as an Azure Functions project and uses [Azure Service Bus](https://azure.microsoft.com/en-us/products/service-bus).
 
-The main technology stack platform is [.NET Core](https://dotnet.microsoft.com/) 8.0.
+The main technology stack platform is [.NET Core](https://dotnet.microsoft.com/) 9.0.
 
 ## 🛠 Prerequisites
 
-* Install Visual Studio 2022 (preview) or later, or Visual Studio Code. Ensure that `$ dotnet --version` is at least 8.0.
+* Install Visual Studio 2022 (preview) or later, or Visual Studio Code. Ensure that `$ dotnet --version` is at least 9.0.
 
 ## ⌨️ Install, Build, and Run the Comms
 

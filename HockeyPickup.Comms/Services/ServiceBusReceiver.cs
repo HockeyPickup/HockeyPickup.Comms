@@ -1,3 +1,4 @@
+#pragma warning disable CS8604 // Possible null reference argument.
 using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Logging;
 using HockeyPickup.Api;
@@ -64,3 +65,4 @@ public class AzureServiceBusReceiver : IAzureServiceBusReceiver
         return Task.CompletedTask;
     }
 }
+#pragma warning restore CS8604 // Possible null reference argument.

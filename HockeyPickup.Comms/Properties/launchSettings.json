@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "HockeyPickup.Comms": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7207",
+      "launchBrowser": false
+    }
+  }
+}

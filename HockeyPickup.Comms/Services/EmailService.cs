@@ -13,6 +13,7 @@ public interface IEmailService
 public enum EmailTemplate
 {
     SignedIn,
+    Register
     // Add more as needed
 }
 
@@ -29,6 +30,10 @@ public class EmailService : IEmailService
             {
                 EmailTemplate.SignedIn,
                 ("signed_in.txt", new HashSet<string> { "EMAIL" })
+            },
+            {
+                EmailTemplate.Register,
+                ("register.txt", new HashSet<string> { "EMAIL", "FIRSTNAME", "LASTNAME", "CONFIRMATION_URL" })
             },
         };
     }
@@ -67,8 +72,7 @@ public class EmailService : IEmailService
             message.AddTo(to);
             message.SetSubject(subject);
 
-            message.AddContent(MimeType.Html, body.Replace(Environment.NewLine, "<br />").Replace("\r", "<br />").Replace("\n", "<br />"));
-            message.AddContent(MimeType.Text, body);
+            message.AddContent(MimeType.Html, body);
 
             var client = new SendGridClient(Environment.GetEnvironmentVariable("SendGridApiKey"));
 

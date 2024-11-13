@@ -1,0 +1,35 @@
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 10px; color: #333;">
+    <div style="background: #ffffff; padding: 10px; border-radius: 5px;">
+        <h1 style="color: #2C5282; margin-bottom: 10px; font-size: 24px;">Welcome to Hockey Pickup!</h1>
+
+        <p style="margin-bottom: 10px; line-height: 1.5;">Hi {{FIRSTNAME}},</p>
+
+        <p style="margin-bottom: 10px; line-height: 1.5;">Thanks for joining Hockey Pickup! We're excited to have you as part of our hockey community. To get started, we need to verify your email address.</p>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="{{CONFIRMATION_URL}}" style="background-color: #2C5282; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">Confirm Email Address</a>
+        </div>
+
+        <p style="text-align: center; margin-bottom: 20px; line-height: 1.5; font-size: 14px; color: #666;">This link will expire in 24 hours.</p>
+
+        <div style="margin: 10px 0; padding: 10px; background-color: #F7FAFC; border-radius: 5px;">
+            <p style="margin-bottom: 10px; font-weight: bold;">Once confirmed, you'll be able to:</p>
+            <ul style="margin: 0; padding-left: 20px; line-height: 1.6;">
+                <li>View and join pickup hockey sessions</li>
+                <li>Get notified when new sessions are posted</li>
+                <li>View the roster for each player</li>
+                <li>Have fun playing hockey!</li>
+            </ul>
+        </div>
+
+        <p style="margin-bottom: 10px; line-height: 1.5;">If you didn't create an account with Hockey Pickup, please ignore this email or contact us at <a href="mailto:info@hockeypickup.com" style="color: #2C5282;">info@hockeypickup.com</a>.</p>
+
+        <p style="margin-bottom: 10px; line-height: 1.5;">Need help? Have questions? Just reply to this email - we're here to help!</p>
+
+        <p style="margin-bottom: 5px; line-height: 1.5;">Thanks,<br>Brett</p>
+    </div>
+
+    <div style="margin-top: 10px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666; text-align: center;">
+        <p>This email was sent to {{EMAIL}}.<br>
+    </div>
+</div>

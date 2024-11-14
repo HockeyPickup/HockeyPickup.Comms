@@ -6,7 +6,7 @@ public interface ICommsHandler
 {
     Task SendSignedInEmail(string email);
     Task SendRegistrationConfirmationEmail(string Email, string UserId, string FirstName, string LastName, string ConfirmationUrl);
-    Task SendResetPasswordEmail(string Email, string UserId, string FirstName, string LastName, string ResetUrl);
+    Task SendForgotPasswordEmail(string Email, string UserId, string FirstName, string LastName, string ResetUrl);
 }
 
 public class CommsHandler : ICommsHandler
@@ -20,25 +20,25 @@ public class CommsHandler : ICommsHandler
         _emailService = emailService;
     }
 
-    public async Task SendResetPasswordEmail(string Email, string UserId, string FirstName, string LastName, string ResetUrl)
+    public async Task SendForgotPasswordEmail(string Email, string UserId, string FirstName, string LastName, string ResetUrl)
     {
         try
         {
-            _logger.LogInformation($"CommsHandler->Sending Reset Password email for: {Email}");
+            _logger.LogInformation($"CommsHandler->Sending Forgot Password email for: {Email}");
 
             if (string.IsNullOrEmpty(Email))
             {
                 throw new ArgumentException("Email cannot be null or empty", nameof(Email));
             }
 
-            await _emailService.SendEmailAsync(Email, "Reset Password", EmailTemplate.PasswordReset,
+            await _emailService.SendEmailAsync(Email, "Forgot Password", EmailTemplate.ForgotPassword,
                 new Dictionary<string, string> { { "EMAIL", Email }, { "FIRSTNAME", FirstName }, { "LASTNAME", LastName }, { "RESET_URL", ResetUrl } });
 
-            _logger.LogInformation($"CommsHandler->Successfully sent Reset Password email for: {Email}");
+            _logger.LogInformation($"CommsHandler->Successfully sent Forgot Password email for: {Email}");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"CommsHandler->Error sending Reset Password email for: {Email}");
+            _logger.LogError(ex, $"CommsHandler->Error sending Forgot Password email for: {Email}");
 
             throw;
         }

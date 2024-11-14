@@ -14,7 +14,7 @@ public enum EmailTemplate
 {
     SignedIn,
     Register,
-    PasswordReset
+    ForgotPassword
     // Add more as needed
 }
 
@@ -37,8 +37,8 @@ public class EmailService : IEmailService
                 ("register.txt", new HashSet<string> { "EMAIL", "FIRSTNAME", "LASTNAME", "CONFIRMATION_URL" })
             },
             {
-                EmailTemplate.PasswordReset,
-                ("password_reset.txt", new HashSet<string> { "EMAIL", "FIRSTNAME", "RESET_URL" })
+                EmailTemplate.ForgotPassword,
+                ("forgot_password.txt", new HashSet<string> { "EMAIL", "FIRSTNAME", "RESET_URL" })
             },
         };
     }

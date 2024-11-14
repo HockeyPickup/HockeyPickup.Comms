@@ -34,8 +34,8 @@ public class MessageProcessor : IMessageProcessor
                 await ProcessRegisterConfirmation(message);
                 break;
 
-            case "PasswordReset":
-                await ProcessResetPassword(message);
+            case "ForgotPassword":
+                await ProcessForgotPassword(message);
                 break;
 
             default:
@@ -86,17 +86,17 @@ public class MessageProcessor : IMessageProcessor
 
     }
 
-    private async Task ProcessResetPassword(ServiceBusCommsMessage message)
+    private async Task ProcessForgotPassword(ServiceBusCommsMessage message)
     {
-        if (!ValidateResetPasswordMessage(message, out var Email, out var UserId, out var FirstName, out var LastName, out var ResetUrl))
+        if (!ValidateForgotPasswordMessage(message, out var Email, out var UserId, out var FirstName, out var LastName, out var ResetUrl))
         {
-            throw new ArgumentException("Required data missing for ResetPassword message");
+            throw new ArgumentException("Required data missing for ForgotPassword message");
         }
 
-        await _commsHandler.SendResetPasswordEmail(Email, UserId, FirstName, LastName, ResetUrl);
+        await _commsHandler.SendForgotPasswordEmail(Email, UserId, FirstName, LastName, ResetUrl);
     }
 
-    private bool ValidateResetPasswordMessage(ServiceBusCommsMessage message, out string Email, out string UserId, out string FirstName, out string LastName, out string ResetUrl)
+    private bool ValidateForgotPasswordMessage(ServiceBusCommsMessage message, out string Email, out string UserId, out string FirstName, out string LastName, out string ResetUrl)
     {
         Email = string.Empty;
         UserId = string.Empty;

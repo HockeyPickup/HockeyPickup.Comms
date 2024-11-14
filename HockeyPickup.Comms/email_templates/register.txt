@@ -22,7 +22,7 @@
             </ul>
         </div>
 
-        <p style="margin-bottom: 10px; line-height: 1.5;">If you didn't create an account with Hockey Pickup, please ignore this email or contact us at <a href="mailto:info@hockeypickup.com" style="color: #2C5282;">info@hockeypickup.com</a>.</p>
+        <p style="margin-bottom: 10px; line-height: 1.5;">If you didn't create an account with Hockey Pickup, please ignore this email or contact us at <a href="mailto:support@hockeypickup.com" style="color: #2C5282;">support@hockeypickup.com</a>.</p>
 
         <p style="margin-bottom: 10px; line-height: 1.5;">Need help? Have questions? Just reply to this email - we're here to help!</p>
 

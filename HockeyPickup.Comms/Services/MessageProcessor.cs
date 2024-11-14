@@ -34,6 +34,10 @@ public class MessageProcessor : IMessageProcessor
                 await ProcessRegisterConfirmation(message);
                 break;
 
+            case "PasswordReset":
+                await ProcessResetPassword(message);
+                break;
+
             default:
                 throw new ArgumentException($"Unknown message type: {message.Metadata["Type"]}");
         }
@@ -76,6 +80,32 @@ public class MessageProcessor : IMessageProcessor
 
         return message.CommunicationMethod.TryGetValue("Email", out Email) &&
                message.MessageData?.TryGetValue("ConfirmationUrl", out ConfirmationUrl) == true &&
+               message.RelatedEntities.TryGetValue("UserId", out UserId) &&
+               message.RelatedEntities.TryGetValue("FirstName", out FirstName) &&
+               message.RelatedEntities.TryGetValue("LastName", out LastName);
+
+    }
+
+    private async Task ProcessResetPassword(ServiceBusCommsMessage message)
+    {
+        if (!ValidateResetPasswordMessage(message, out var Email, out var UserId, out var FirstName, out var LastName, out var ResetUrl))
+        {
+            throw new ArgumentException("Required data missing for ResetPassword message");
+        }
+
+        await _commsHandler.SendResetPasswordEmail(Email, UserId, FirstName, LastName, ResetUrl);
+    }
+
+    private bool ValidateResetPasswordMessage(ServiceBusCommsMessage message, out string Email, out string UserId, out string FirstName, out string LastName, out string ResetUrl)
+    {
+        Email = string.Empty;
+        UserId = string.Empty;
+        FirstName = string.Empty;
+        LastName = string.Empty;
+        ResetUrl = string.Empty;
+
+        return message.CommunicationMethod.TryGetValue("Email", out Email) &&
+               message.MessageData?.TryGetValue("ResetUrl", out ResetUrl) == true &&
                message.RelatedEntities.TryGetValue("UserId", out UserId) &&
                message.RelatedEntities.TryGetValue("FirstName", out FirstName) &&
                message.RelatedEntities.TryGetValue("LastName", out LastName);

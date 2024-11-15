@@ -30,7 +30,7 @@ jobs:
       uses: anothrNick/github-tag-action@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        REPO_OWNER: morrisonbrett
+        REPO_OWNER: HockeyPickup
         DEFAULT_BUMP: patch
 
   build_and_deploy_job:

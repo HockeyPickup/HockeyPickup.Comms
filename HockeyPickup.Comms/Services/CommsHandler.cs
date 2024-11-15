@@ -31,7 +31,7 @@ public class CommsHandler : ICommsHandler
                 throw new ArgumentException("Email cannot be null or empty", nameof(Email));
             }
 
-            await _emailService.SendEmailAsync(Email, "Forgot Password", EmailTemplate.ForgotPassword,
+            await _emailService.SendEmailAsync(Email, "Reset Password Request", EmailTemplate.ForgotPassword,
                 new Dictionary<string, string> { { "EMAIL", Email }, { "FIRSTNAME", FirstName }, { "LASTNAME", LastName }, { "RESET_URL", ResetUrl } });
 
             _logger.LogInformation($"CommsHandler->Successfully sent Forgot Password email for: {Email}");

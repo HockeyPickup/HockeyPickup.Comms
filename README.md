@@ -1,7 +1,9 @@
+# 🏒 HockeyPickup.Comms
+
+[![Logo](static/JB_Puck_Logo.png)](https://hockeypickup.com)
+
 [![HockeyPickup.Comms](https://github.com/HockeyPickup/HockeyPickup.Comms/actions/workflows/hockeypickup-comms-github.yml/badge.svg)](https://github.com/HockeyPickup/HockeyPickup.Comms/actions/workflows/hockeypickup-comms-github.yml)
 [![CodeQL](https://github.com/HockeyPickup/HockeyPickup.Comms/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/HockeyPickup/HockeyPickup.Comms/actions/workflows/github-code-scanning/codeql)
-
-# HockeyPickup.Comms
 
 ## 🌈 Overview
 

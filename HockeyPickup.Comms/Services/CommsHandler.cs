@@ -4,7 +4,7 @@ namespace HockeyPickup.Comms.Services;
 
 public interface ICommsHandler
 {
-    Task SendSignedInEmail(string email);
+    Task SendSignedInEmail(string Email, string FirstName, string LastName);
     Task SendRegistrationConfirmationEmail(string Email, string UserId, string FirstName, string LastName, string ConfirmationUrl);
     Task SendForgotPasswordEmail(string Email, string UserId, string FirstName, string LastName, string ResetUrl);
 }
@@ -68,25 +68,31 @@ public class CommsHandler : ICommsHandler
         }
     }
 
-    public async Task SendSignedInEmail(string email)
+    public async Task SendSignedInEmail(string Email, string FirstName, string LastName)
     {
         try
         {
-            _logger.LogInformation($"CommsHandler->Sending Signed In email for: {email}");
+            _logger.LogInformation($"CommsHandler->Sending Signed In email for: {Email}, {FirstName} {LastName}");
 
-            if (string.IsNullOrEmpty(email))
+            if (string.IsNullOrEmpty(Email))
             {
-                throw new ArgumentException("Email cannot be null or empty", nameof(email));
+                throw new ArgumentException("Email cannot be null or empty", nameof(Email));
             }
 
-            await _emailService.SendEmailAsync(email, "Signed In Alert", EmailTemplate.SignedIn,
-                new Dictionary<string, string> { { "EMAIL", email } });
+            var alertEmail = Environment.GetEnvironmentVariable("SignInAlertEmail");
+            if (string.IsNullOrEmpty(alertEmail))
+            {
+                throw new ArgumentException("Alert Email cannot be null or empty", nameof(alertEmail));
+            }
 
-            _logger.LogInformation($"CommsHandler->Successfully sent Signed In email for: {email}");
+            await _emailService.SendEmailAsync(alertEmail, "Signed In Alert", EmailTemplate.SignedIn,
+                new Dictionary<string, string> { { "EMAIL", Email }, { "FIRSTNAME", FirstName }, { "LASTNAME", LastName } });
+
+            _logger.LogInformation($"CommsHandler->Successfully sent Signed In email for: {Email}, {FirstName} {LastName}");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"CommsHandler->Error sending Signed In email for: {email}");
+            _logger.LogError(ex, $"CommsHandler->Error sending Signed In email for: {Email}, {FirstName} {LastName}");
 
             throw;
         }

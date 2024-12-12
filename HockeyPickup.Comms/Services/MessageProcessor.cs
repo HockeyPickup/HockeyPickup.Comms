@@ -45,19 +45,23 @@ public class MessageProcessor : IMessageProcessor
 
     private async Task ProcessSignedIn(ServiceBusCommsMessage message)
     {
-        if (!ValidateSignedInMessage(message, out var Email))
+        if (!ValidateSignedInMessage(message, out var Email, out var FirstName, out var LastName))
         {
             throw new ArgumentException("Required data missing for SignedIn message");
         }
 
-        await _commsHandler.SendSignedInEmail(Email);
+        await _commsHandler.SendSignedInEmail(Email, FirstName, LastName);
     }
 
-    private bool ValidateSignedInMessage(ServiceBusCommsMessage message, out string Email)
+    private bool ValidateSignedInMessage(ServiceBusCommsMessage message, out string Email, out string FirstName, out string LastName)
     {
         Email = string.Empty;
+        FirstName = string.Empty;
+        LastName = string.Empty;
 
-        return message.CommunicationMethod.TryGetValue("Email", out Email);
+        return message.CommunicationMethod.TryGetValue("Email", out Email) &&
+               message.RelatedEntities.TryGetValue("FirstName", out FirstName) &&
+               message.RelatedEntities.TryGetValue("LastName", out LastName);
     }
 
     private async Task ProcessRegisterConfirmation(ServiceBusCommsMessage message)

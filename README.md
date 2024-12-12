@@ -32,7 +32,8 @@ Get the `SendGridApiKey` from [SendGrid](https://sendgrid.com/en-us/solutions/em
     "ServiceBusConnectionString": "<ServiceBusConnectionString>",
     "ServiceBusCommsQueueName": "comms-dev",
     "SendGridApiKey": "<SendGridApiKey>",
-    "SendGridFromAddress": "pickup@hockeypickup.com"
+    "SendGridFromAddress": "pickup@hockeypickup.com",
+    "SignInAlertEmail":  "pickup@hockeypickup.com"
   }
 }
 ```

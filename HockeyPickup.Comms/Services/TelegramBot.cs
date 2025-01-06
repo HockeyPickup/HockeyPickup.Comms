@@ -120,7 +120,7 @@ public class TelegramBot
             LogInformation($"Start listening for @{me.Username}");
 
             // Disabling notification doesn't seem to work. Too many of these messages.
-            //await SendChannelMessageAsync($"TrueVote API Bot Started: @{me.Username}", true);
+            //await SendChannelMessageAsync($"HockeyPickup API Bot Started: @{me.Username}", true);
 
             // This keeps it running
             new ManualResetEvent(false).WaitOne();

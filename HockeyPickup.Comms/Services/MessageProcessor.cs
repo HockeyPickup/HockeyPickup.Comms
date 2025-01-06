@@ -13,11 +13,13 @@ public class MessageProcessor : IMessageProcessor
 {
     private readonly ICommsHandler _commsHandler;
     private readonly ILogger<MessageProcessor> _logger;
+    private readonly TelegramBot _telegramBot;
 
-    public MessageProcessor(ICommsHandler commsHandler, ILogger<MessageProcessor> logger)
+    public MessageProcessor(ICommsHandler commsHandler, ILogger<MessageProcessor> logger, TelegramBot telegramBot)
     {
         _commsHandler = commsHandler;
         _logger = logger;
+        _telegramBot = telegramBot;
     }
 
     public async Task ProcessMessageAsync(ServiceBusCommsMessage message)
@@ -50,6 +52,8 @@ public class MessageProcessor : IMessageProcessor
             throw new ArgumentException("Required data missing for SignedIn message");
         }
 
+        await _telegramBot.SendChannelMessageAsync($"{FirstName} {LastName} Signed In");
+
         await _commsHandler.SendSignedInEmail(Email, FirstName, LastName);
     }
 
@@ -70,6 +74,8 @@ public class MessageProcessor : IMessageProcessor
         {
             throw new ArgumentException("Required data missing for RegisterConfirmation message");
         }
+
+        await _telegramBot.SendChannelMessageAsync($"{FirstName} {LastName} Registered");
 
         await _commsHandler.SendRegistrationConfirmationEmail(Email, UserId, FirstName, LastName, ConfirmationUrl);
     }
@@ -96,6 +102,8 @@ public class MessageProcessor : IMessageProcessor
         {
             throw new ArgumentException("Required data missing for ForgotPassword message");
         }
+
+        await _telegramBot.SendChannelMessageAsync($"{FirstName} {LastName} Invoked Forgot Password");
 
         await _commsHandler.SendForgotPasswordEmail(Email, UserId, FirstName, LastName, ResetUrl);
     }

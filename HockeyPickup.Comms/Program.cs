@@ -3,7 +3,7 @@ using Microsoft.Extensions.Hosting;
 using HockeyPickup.Comms.Services;
 
 var host = new HostBuilder()
-    .ConfigureFunctionsWorkerDefaults()
+    .ConfigureFunctionsWebApplication()
     .ConfigureServices(services =>
     {
         services.AddSingleton<IEmailService, EmailService>();

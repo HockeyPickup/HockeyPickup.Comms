@@ -7,6 +7,7 @@ public interface ICommsHandler
     Task SendSignedInEmail(string Email, string FirstName, string LastName);
     Task SendRegistrationConfirmationEmail(string Email, string UserId, string FirstName, string LastName, string ConfirmationUrl);
     Task SendForgotPasswordEmail(string Email, string UserId, string FirstName, string LastName, string ResetUrl);
+    Task SendRawContentEmail(string Subject, string RawContent);
 }
 
 public class CommsHandler : ICommsHandler
@@ -18,6 +19,31 @@ public class CommsHandler : ICommsHandler
     {
         _logger = logger;
         _emailService = emailService;
+    }
+
+    public async Task SendRawContentEmail(string Subject, string RawContent)
+    {
+        try
+        {
+            _logger.LogInformation($"CommsHandler->Sending Raw Content Email");
+
+            var alertEmail = Environment.GetEnvironmentVariable("SignInAlertEmail");
+            if (string.IsNullOrEmpty(alertEmail))
+            {
+                throw new ArgumentException("Alert Email cannot be null or empty", nameof(alertEmail));
+            }
+
+            await _emailService.SendEmailAsync(alertEmail, Subject, EmailTemplate.RawContent,
+                new Dictionary<string, string> { { "RAWCONTENT", RawContent } });
+
+            _logger.LogInformation($"CommsHandler->Successfully sent Raw Content email");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"CommsHandler->Successfully sent Raw Content email");
+
+            throw;
+        }
     }
 
     public async Task SendForgotPasswordEmail(string Email, string UserId, string FirstName, string LastName, string ResetUrl)

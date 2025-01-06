@@ -14,7 +14,8 @@ public enum EmailTemplate
 {
     SignedIn,
     Register,
-    ForgotPassword
+    ForgotPassword,
+    RawContent
     // Add more as needed
 }
 
@@ -31,6 +32,10 @@ public class EmailService : IEmailService
             {
                 EmailTemplate.SignedIn,
                 ("signed_in.txt", new HashSet<string> { "EMAIL" })
+            },
+            {
+                EmailTemplate.RawContent,
+                ("raw_content.txt", new HashSet<string> { "RAWCONTENT" })
             },
             {
                 EmailTemplate.Register,

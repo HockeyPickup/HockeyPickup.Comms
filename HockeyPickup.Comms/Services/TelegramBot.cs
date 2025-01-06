@@ -27,7 +27,7 @@ public class TelegramBot
     private static TelegramBotClient? botClient = null; // To connect to bot: https://t.me/HockeyPickupAPI_bot
     private static string TelegramRuntimeChannel = string.Empty;
     private static string BaseApiUrl = string.Empty;
-    private static readonly string HelpText = "📖 TrueVote API Bot enables you execute some commands on the API. Simply use / in this chat to see a list of commands. To view broadcast messages, be sure and join the TrueVote API Runtime Channel: https://t.me/{0}";
+    private static readonly string HelpText = "🏒 HockeyPickup API Bot enables you execute some commands on the API. Simply use / in this chat to see a list of commands. To view broadcast messages, be sure and join the HockeyPickup API Runtime Channel: https://t.me/{0}";
 
     public TelegramBot()
     {

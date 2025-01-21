@@ -15,7 +15,8 @@ public enum EmailTemplate
     SignedIn,
     Register,
     ForgotPassword,
-    RawContent
+    RawContent,
+    CreateSession
     // Add more as needed
 }
 
@@ -44,6 +45,10 @@ public class EmailService : IEmailService
             {
                 EmailTemplate.ForgotPassword,
                 ("forgot_password.txt", new HashSet<string> { "EMAIL", "FIRSTNAME", "RESET_URL" })
+            },
+            {
+                EmailTemplate.CreateSession,
+                ("create_session.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "SESSION_URL", "NOTE", "CREATEDBYNAME" })
             },
         };
     }

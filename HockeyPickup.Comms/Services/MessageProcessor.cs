@@ -40,9 +40,46 @@ public class MessageProcessor : IMessageProcessor
                 await ProcessForgotPassword(message);
                 break;
 
+            case "CreateSession":
+                await ProcessCreateSession(message);
+                break;
+
             default:
                 throw new ArgumentException($"Unknown message type: {message.Metadata["Type"]}");
         }
+    }
+
+    private async Task ProcessCreateSession(ServiceBusCommsMessage message)
+    {
+        if (!ValidateCreateSessionMessage(message, out var Emails, out var SessionDate, out var SessionUrl, out var Note, out var CreatedByName))
+        {
+            throw new ArgumentException("Required data missing for CreateSession message");
+        }
+
+        await _commsHandler.SendCreateSessionEmails(Emails, SessionDate, SessionUrl, Note, CreatedByName);
+    }
+
+    private bool ValidateCreateSessionMessage(ServiceBusCommsMessage message, out string[] Emails, out DateTime SessionDate, out string SessionUrl, out string Note, out string CreatedByName)
+    {
+        try
+        {
+            Emails = message.RelatedEntities.Values.ToArray();
+            SessionDate = DateTime.Parse(message.MessageData["SessionDate"]);
+            Note = message.MessageData["Note"];
+            CreatedByName = message.MessageData["CreatedByName"];
+            SessionUrl = message.MessageData["SessionUrl"];
+        }
+        catch
+        {
+            Emails = Array.Empty<string>();
+            SessionDate = DateTime.MinValue;
+            Note = string.Empty;
+            CreatedByName = string.Empty;
+            SessionUrl = string.Empty;
+            return false;
+        }
+
+        return true;
     }
 
     private async Task ProcessSignedIn(ServiceBusCommsMessage message)

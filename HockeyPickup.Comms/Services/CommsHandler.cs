@@ -8,6 +8,7 @@ public interface ICommsHandler
     Task SendRegistrationConfirmationEmail(string Email, string UserId, string FirstName, string LastName, string ConfirmationUrl);
     Task SendForgotPasswordEmail(string Email, string UserId, string FirstName, string LastName, string ResetUrl);
     Task SendRawContentEmail(string Subject, string RawContent);
+    Task SendCreateSessionEmails(string[] Emails, DateTime SessionDate, string SessionUrl, string Note, string CreatedByName);
 }
 
 public class CommsHandler : ICommsHandler
@@ -119,6 +120,39 @@ public class CommsHandler : ICommsHandler
         catch (Exception ex)
         {
             _logger.LogError(ex, $"CommsHandler->Error sending Signed In email for: {Email}, {FirstName} {LastName}");
+
+            throw;
+        }
+    }
+
+    public async Task SendCreateSessionEmails(string[] Emails, DateTime SessionDate, string SessionUrl, string Note, string CreatedByName)
+    {
+        try
+        {
+            _logger.LogInformation($"CommsHandler->Sending Create Session email for: {SessionDate}");
+
+            var alertEmail = Environment.GetEnvironmentVariable("SignInAlertEmail");
+            if (string.IsNullOrEmpty(alertEmail))
+            {
+                throw new ArgumentException("Alert Email cannot be null or empty", nameof(alertEmail));
+            }
+
+            foreach (var email in Emails)
+            {
+                if (string.IsNullOrEmpty(email))
+                {
+                    throw new ArgumentException("Email cannot be null or empty", nameof(email));
+                }
+
+                await _emailService.SendEmailAsync(email, $"Session {SessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")} Created", EmailTemplate.CreateSession,
+                    new Dictionary<string, string> { { "EMAIL", email }, { "SESSIONDATE", SessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") }, { "SESSION_URL", SessionUrl }, { "NOTE", Note }, { "CREATEDBYNAME", CreatedByName } });
+            }
+
+            _logger.LogInformation($"CommsHandler->Successfully sent {Emails.Count()} Create Session emails for: {SessionDate}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"CommsHandler->Error sending {Emails.Count()} Create Session emails for: {SessionDate}");
 
             throw;
         }

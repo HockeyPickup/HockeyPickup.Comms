@@ -153,11 +153,11 @@ public class MessageProcessor : IMessageProcessor
         await _commsHandler.SendCreateSessionEmails(Emails, SessionDate, SessionUrl, Note, CreatedByName);
     }
 
-    private bool ValidateCreateSessionMessage(ServiceBusCommsMessage message, out string[] Emails, out DateTime SessionDate, out string SessionUrl, out string Note, out string CreatedByName)
+    private bool ValidateCreateSessionMessage(ServiceBusCommsMessage message, out ICollection<string> Emails, out DateTime SessionDate, out string SessionUrl, out string Note, out string CreatedByName)
     {
         try
         {
-            Emails = message.RelatedEntities.Values.ToArray();
+            Emails = message.NotificationEmails;
             SessionDate = DateTime.Parse(message.MessageData["SessionDate"]);
             Note = message.MessageData["Note"];
             CreatedByName = message.MessageData["CreatedByName"];

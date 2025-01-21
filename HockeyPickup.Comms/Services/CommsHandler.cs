@@ -7,7 +7,7 @@ public interface ICommsHandler
     Task SendRegistrationConfirmationEmail(string Email, string UserId, string FirstName, string LastName, string ConfirmationUrl);
     Task SendForgotPasswordEmail(string Email, string UserId, string FirstName, string LastName, string ResetUrl);
     Task SendRawContentEmail(string Subject, string RawContent);
-    Task SendCreateSessionEmails(string[] Emails, DateTime SessionDate, string SessionUrl, string Note, string CreatedByName);
+    Task SendCreateSessionEmails(ICollection<string> Emails, DateTime SessionDate, string SessionUrl, string Note, string CreatedByName);
     Task SendTeamAssignmentChangeEmail(string Email, DateTime SessionDate, string SessionUrl, string FirstName, string LastName, string FormerTeamAssignment, string NewTeamAssignment);
 }
 
@@ -95,7 +95,7 @@ public class CommsHandler : ICommsHandler
         }
     }
 
-    public async Task SendCreateSessionEmails(string[] Emails, DateTime SessionDate, string SessionUrl, string Note, string CreatedByName)
+    public async Task SendCreateSessionEmails(ICollection<string> Emails, DateTime SessionDate, string SessionUrl, string Note, string CreatedByName)
     {
         try
         {

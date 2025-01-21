@@ -44,9 +44,34 @@ public class MessageProcessor : IMessageProcessor
                 await ProcessCreateSession(message);
                 break;
 
+            case "PhotoUploaded":
+                await ProcessPhotoUploaded(message);
+                break;
+
             default:
                 throw new ArgumentException($"Unknown message type: {message.Metadata["Type"]}");
         }
+    }
+
+    private async Task ProcessPhotoUploaded(ServiceBusCommsMessage message)
+    {
+        if (!ValidatePhotoUploaded(message, out var Email, out var FirstName, out var LastName))
+        {
+            throw new ArgumentException("Required data missing for PhotoUploaded message");
+        }
+
+        await _telegramBot.SendChannelMessageAsync($"{FirstName} {LastName} Uploaded Photo");
+    }
+
+    private bool ValidatePhotoUploaded(ServiceBusCommsMessage message, out string Email, out string FirstName, out string LastName)
+    {
+        Email = string.Empty;
+        FirstName = string.Empty;
+        LastName = string.Empty;
+
+        return message.CommunicationMethod.TryGetValue("Email", out Email) &&
+               message.RelatedEntities.TryGetValue("FirstName", out FirstName) &&
+               message.RelatedEntities.TryGetValue("LastName", out LastName);
     }
 
     private async Task ProcessCreateSession(ServiceBusCommsMessage message)
@@ -90,9 +115,6 @@ public class MessageProcessor : IMessageProcessor
         }
 
         await _telegramBot.SendChannelMessageAsync($"{FirstName} {LastName} Signed In");
-
-        // Now that TelegramBot works, no need to send email to Admin for this.
-        // await _commsHandler.SendSignedInEmail(Email, FirstName, LastName);
     }
 
     private bool ValidateSignedInMessage(ServiceBusCommsMessage message, out string Email, out string FirstName, out string LastName)

@@ -17,7 +17,8 @@ public enum EmailTemplate
     ForgotPassword,
     RawContent,
     CreateSession,
-    TeamAssignmentChange
+    TeamAssignmentChange,
+    TeamAssignmentChangeNotification
     // Add more as needed
 }
 
@@ -54,6 +55,10 @@ public class EmailService : IEmailService
             {
                 EmailTemplate.TeamAssignmentChange,
                 ("team_assignment_change.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "SESSION_URL", "FIRSTNAME", "LASTNAME", "FORMERTEAMASSIGNMENT", "NEWTEAMASSIGNMENT" })
+            },
+            {
+                EmailTemplate.TeamAssignmentChangeNotification,
+                ("team_assignment_change_notification.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "SESSION_URL", "FIRSTNAME", "LASTNAME", "FORMERTEAMASSIGNMENT", "NEWTEAMASSIGNMENT" })
             },
         };
     }

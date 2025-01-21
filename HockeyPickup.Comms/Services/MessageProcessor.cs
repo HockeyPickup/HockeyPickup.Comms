@@ -63,19 +63,20 @@ public class MessageProcessor : IMessageProcessor
 
     private async Task ProcessTeamAssignmentChange(ServiceBusCommsMessage message)
     {
-        if (!ValidateTeamAssignmentChange(message, out var Email, out var FirstName, out var LastName, out var SessionDate, out var SessionUrl, out var FormerTeamAssignment, out var NewTeamAssignment))
+        if (!ValidateTeamAssignmentChange(message, out var Email, out var Emails, out var FirstName, out var LastName, out var SessionDate, out var SessionUrl, out var FormerTeamAssignment, out var NewTeamAssignment))
         {
             throw new ArgumentException("Required data missing for ProcessTeamAssignmentChange message");
         }
 
-        await _commsHandler.SendTeamAssignmentChangeEmail(Email, SessionDate, SessionUrl, FirstName, LastName, FormerTeamAssignment, NewTeamAssignment);
+        await _commsHandler.SendTeamAssignmentChangeEmail(Email, Emails, SessionDate, SessionUrl, FirstName, LastName, FormerTeamAssignment, NewTeamAssignment);
     }
 
-    private bool ValidateTeamAssignmentChange(ServiceBusCommsMessage message, out string Email, out string FirstName, out string LastName, out DateTime SessionDate, out string SessionUrl, out string FormerTeamAssignment, out string NewTeamAssignment)
+    private bool ValidateTeamAssignmentChange(ServiceBusCommsMessage message, out string Email, out ICollection<string> Emails, out string FirstName, out string LastName, out DateTime SessionDate, out string SessionUrl, out string FormerTeamAssignment, out string NewTeamAssignment)
     {
         try
         {
             Email = message.CommunicationMethod["Email"];
+            Emails = message.NotificationEmails;
             FirstName = message.RelatedEntities["FirstName"];
             LastName = message.RelatedEntities["LastName"];
             SessionDate = DateTime.Parse(message.MessageData["SessionDate"]);
@@ -86,6 +87,7 @@ public class MessageProcessor : IMessageProcessor
         catch
         {
             Email = string.Empty;
+            Emails = Array.Empty<string>();
             FirstName = string.Empty;
             LastName = string.Empty;
             SessionDate = DateTime.MinValue;

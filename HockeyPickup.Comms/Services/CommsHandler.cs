@@ -8,7 +8,7 @@ public interface ICommsHandler
     Task SendForgotPasswordEmail(string Email, string UserId, string FirstName, string LastName, string ResetUrl);
     Task SendRawContentEmail(string Subject, string RawContent);
     Task SendCreateSessionEmails(ICollection<string> Emails, DateTime SessionDate, string SessionUrl, string Note, string CreatedByName);
-    Task SendTeamAssignmentChangeEmail(string Email, DateTime SessionDate, string SessionUrl, string FirstName, string LastName, string FormerTeamAssignment, string NewTeamAssignment);
+    Task SendTeamAssignmentChangeEmail(string Email, ICollection<string> Emails, DateTime SessionDate, string SessionUrl, string FirstName, string LastName, string FormerTeamAssignment, string NewTeamAssignment);
 }
 
 public class CommsHandler : ICommsHandler
@@ -128,7 +128,7 @@ public class CommsHandler : ICommsHandler
         }
     }
 
-    public async Task SendTeamAssignmentChangeEmail(string Email, DateTime SessionDate, string SessionUrl, string FirstName, string LastName, string FormerTeamAssignment, string NewTeamAssignment)
+    public async Task SendTeamAssignmentChangeEmail(string Email, ICollection<string> Emails, DateTime SessionDate, string SessionUrl, string FirstName, string LastName, string FormerTeamAssignment, string NewTeamAssignment)
     {
         try
         {
@@ -143,6 +143,20 @@ public class CommsHandler : ICommsHandler
                 new Dictionary<string, string> { { "EMAIL", Email }, { "SESSIONDATE", SessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") }, { "SESSION_URL", SessionUrl }, { "FIRSTNAME", FirstName }, { "LASTNAME", LastName }, { "FORMERTEAMASSIGNMENT", FormerTeamAssignment }, { "NEWTEAMASSIGNMENT", NewTeamAssignment } });
 
             _logger.LogInformation($"CommsHandler->Successfully sent Team Assignment Change email for: {Email}");
+
+            // Now send to all those that have notification 'All' set
+            foreach (var email in Emails)
+            {
+                if (string.IsNullOrEmpty(email))
+                {
+                    throw new ArgumentException("Email cannot be null or empty", nameof(email));
+                }
+
+                await _emailService.SendEmailAsync(email, $"Team Assignment Change for Session {SessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")}", EmailTemplate.TeamAssignmentChangeNotification,
+                    new Dictionary<string, string> { { "EMAIL", email }, { "SESSIONDATE", SessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") }, { "SESSION_URL", SessionUrl }, { "FIRSTNAME", FirstName }, { "LASTNAME", LastName }, { "FORMERTEAMASSIGNMENT", FormerTeamAssignment }, { "NEWTEAMASSIGNMENT", NewTeamAssignment } });
+            }
+
+            _logger.LogInformation($"CommsHandler->Successfully sent {Emails.Count()} Team Assignment Change emails for: {SessionDate}");
         }
         catch (Exception ex)
         {

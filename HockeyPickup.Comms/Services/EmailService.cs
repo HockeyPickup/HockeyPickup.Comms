@@ -16,7 +16,8 @@ public enum EmailTemplate
     Register,
     ForgotPassword,
     RawContent,
-    CreateSession
+    CreateSession,
+    TeamAssignmentChange
     // Add more as needed
 }
 
@@ -49,6 +50,10 @@ public class EmailService : IEmailService
             {
                 EmailTemplate.CreateSession,
                 ("create_session.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "SESSION_URL", "NOTE", "CREATEDBYNAME" })
+            },
+            {
+                EmailTemplate.TeamAssignmentChange,
+                ("team_assignment_change.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "SESSION_URL", "FIRSTNAME", "LASTNAME", "FORMERTEAMASSIGNMENT", "NEWTEAMASSIGNMENT" })
             },
         };
     }

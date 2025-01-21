@@ -52,9 +52,51 @@ public class MessageProcessor : IMessageProcessor
                 await ProcessAddedPaymentMethod(message);
                 break;
 
+            case "TeamAssignmentChange":
+                await ProcessTeamAssignmentChange(message);
+                break;
+
             default:
                 throw new ArgumentException($"Unknown message type: {message.Metadata["Type"]}");
         }
+    }
+
+    private async Task ProcessTeamAssignmentChange(ServiceBusCommsMessage message)
+    {
+        if (!ValidateTeamAssignmentChange(message, out var Email, out var FirstName, out var LastName, out var SessionDate, out var SessionUrl, out var FormerTeamAssignment, out var NewTeamAssignment))
+        {
+            throw new ArgumentException("Required data missing for ProcessTeamAssignmentChange message");
+        }
+
+        await _commsHandler.SendTeamAssignmentChangeEmail(Email, SessionDate, SessionUrl, FirstName, LastName, FormerTeamAssignment, NewTeamAssignment);
+    }
+
+    private bool ValidateTeamAssignmentChange(ServiceBusCommsMessage message, out string Email, out string FirstName, out string LastName, out DateTime SessionDate, out string SessionUrl, out string FormerTeamAssignment, out string NewTeamAssignment)
+    {
+        try
+        {
+            Email = message.CommunicationMethod["Email"];
+            FirstName = message.RelatedEntities["FirstName"];
+            LastName = message.RelatedEntities["LastName"];
+            SessionDate = DateTime.Parse(message.MessageData["SessionDate"]);
+            SessionUrl = message.MessageData["SessionUrl"];
+            FormerTeamAssignment = message.MessageData["FormerTeamAssignment"];
+            NewTeamAssignment = message.MessageData["NewTeamAssignment"];
+        }
+        catch
+        {
+            Email = string.Empty;
+            FirstName = string.Empty;
+            LastName = string.Empty;
+            SessionDate = DateTime.MinValue;
+            SessionUrl = string.Empty;
+            FormerTeamAssignment = string.Empty;
+            NewTeamAssignment = string.Empty;
+
+            return false;
+        }
+
+        return true;
     }
 
     private async Task ProcessAddedPaymentMethod(ServiceBusCommsMessage message)

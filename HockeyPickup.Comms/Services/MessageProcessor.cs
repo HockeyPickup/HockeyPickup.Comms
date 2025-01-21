@@ -48,9 +48,36 @@ public class MessageProcessor : IMessageProcessor
                 await ProcessPhotoUploaded(message);
                 break;
 
+            case "AddedPaymentMethod":
+                await ProcessAddedPaymentMethod(message);
+                break;
+
             default:
                 throw new ArgumentException($"Unknown message type: {message.Metadata["Type"]}");
         }
+    }
+
+    private async Task ProcessAddedPaymentMethod(ServiceBusCommsMessage message)
+    {
+        if (!ValidateAddedPaymentMethod(message, out var Email, out var FirstName, out var LastName, out var PaymentMethodType))
+        {
+            throw new ArgumentException("Required data missing for AddedPaymentMethod message");
+        }
+
+        await _telegramBot.SendChannelMessageAsync($"{FirstName} {LastName} Added Payment Method Type {PaymentMethodType}");
+    }
+
+    private bool ValidateAddedPaymentMethod(ServiceBusCommsMessage message, out string Email, out string FirstName, out string LastName, out string PaymentMethodType)
+    {
+        Email = string.Empty;
+        FirstName = string.Empty;
+        LastName = string.Empty;
+        PaymentMethodType = string.Empty;
+
+        return message.CommunicationMethod.TryGetValue("Email", out Email) &&
+               message.RelatedEntities.TryGetValue("FirstName", out FirstName) &&
+               message.RelatedEntities.TryGetValue("LastName", out LastName) &&
+               message.MessageData.TryGetValue("PaymentMethodType", out PaymentMethodType);
     }
 
     private async Task ProcessPhotoUploaded(ServiceBusCommsMessage message)
@@ -101,6 +128,7 @@ public class MessageProcessor : IMessageProcessor
             Note = string.Empty;
             CreatedByName = string.Empty;
             SessionUrl = string.Empty;
+
             return false;
         }
 

@@ -37,7 +37,7 @@ public class CheckCalendarFunction
 
     #region interface
     [Function("CheckCalendar")]
-    public async Task RunAsync([TimerTrigger("0 0 10 */4 *")] TimerInfo timerInfo)
+    public async Task RunAsync([TimerTrigger("0 0 10,14 * * *")] TimerInfo timerInfo)
     {
         _logger.LogInformation($"Timer trigger function executed: {timerInfo?.ScheduleStatus?.ToString()}");
 

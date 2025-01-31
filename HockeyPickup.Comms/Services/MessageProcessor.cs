@@ -63,19 +63,22 @@ public class MessageProcessor : IMessageProcessor
 
     private async Task ProcessTeamAssignmentChange(ServiceBusCommsMessage message)
     {
-        if (!ValidateTeamAssignmentChange(message, out var Email, out var Emails, out var FirstName, out var LastName, out var SessionDate, out var SessionUrl, out var FormerTeamAssignment, out var NewTeamAssignment))
+        if (!ValidateTeamAssignmentChange(message, out var Email, out var NotificationPreference, out var Emails, out var FirstName, out var LastName, out var SessionDate, out var SessionUrl, out var FormerTeamAssignment, out var NewTeamAssignment))
         {
             throw new ArgumentException("Required data missing for ProcessTeamAssignmentChange message");
         }
 
-        await _commsHandler.SendTeamAssignmentChangeEmail(Email, Emails, SessionDate, SessionUrl, FirstName, LastName, FormerTeamAssignment, NewTeamAssignment);
+        await _telegramBot.SendChannelMessageAsync($"{FirstName} {LastName} - Team Assignment Change from {FormerTeamAssignment} to {NewTeamAssignment} for Session {SessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")}");
+
+        await _commsHandler.SendTeamAssignmentChangeEmail(Email, NotificationPreference, Emails, SessionDate, SessionUrl, FirstName, LastName, FormerTeamAssignment, NewTeamAssignment);
     }
 
-    private bool ValidateTeamAssignmentChange(ServiceBusCommsMessage message, out string Email, out ICollection<string> Emails, out string FirstName, out string LastName, out DateTime SessionDate, out string SessionUrl, out string FormerTeamAssignment, out string NewTeamAssignment)
+    private bool ValidateTeamAssignmentChange(ServiceBusCommsMessage message, out string Email, out NotificationPreference NotificationPreference, out ICollection<string> Emails, out string FirstName, out string LastName, out DateTime SessionDate, out string SessionUrl, out string FormerTeamAssignment, out string NewTeamAssignment)
     {
         try
         {
             Email = message.CommunicationMethod["Email"];
+            NotificationPreference = Enum.Parse<NotificationPreference>(message.CommunicationMethod["NotificationPreference"]);
             Emails = message.NotificationEmails;
             FirstName = message.RelatedEntities["FirstName"];
             LastName = message.RelatedEntities["LastName"];
@@ -87,6 +90,7 @@ public class MessageProcessor : IMessageProcessor
         catch
         {
             Email = string.Empty;
+            NotificationPreference = NotificationPreference.None;
             Emails = Array.Empty<string>();
             FirstName = string.Empty;
             LastName = string.Empty;
@@ -103,7 +107,7 @@ public class MessageProcessor : IMessageProcessor
 
     private async Task ProcessAddedPaymentMethod(ServiceBusCommsMessage message)
     {
-        if (!ValidateAddedPaymentMethod(message, out var Email, out var FirstName, out var LastName, out var PaymentMethodType))
+        if (!ValidateAddedPaymentMethod(message, out var Email, out var NotificationPreference, out var FirstName, out var LastName, out var PaymentMethodType))
         {
             throw new ArgumentException("Required data missing for AddedPaymentMethod message");
         }
@@ -111,22 +115,32 @@ public class MessageProcessor : IMessageProcessor
         await _telegramBot.SendChannelMessageAsync($"{FirstName} {LastName} Added Payment Method Type {PaymentMethodType}");
     }
 
-    private bool ValidateAddedPaymentMethod(ServiceBusCommsMessage message, out string Email, out string FirstName, out string LastName, out string PaymentMethodType)
+    private bool ValidateAddedPaymentMethod(ServiceBusCommsMessage message, out string Email, out NotificationPreference NotificationPreference, out string FirstName, out string LastName, out string PaymentMethodType)
     {
-        Email = string.Empty;
-        FirstName = string.Empty;
-        LastName = string.Empty;
-        PaymentMethodType = string.Empty;
+        try
+        {
+            Email = message.CommunicationMethod["Email"];
+            NotificationPreference = Enum.Parse<NotificationPreference>(message.CommunicationMethod["NotificationPreference"]);
+            FirstName = message.RelatedEntities["FirstName"];
+            LastName = message.RelatedEntities["LastName"];
+            PaymentMethodType = message.MessageData["PaymentMethodType"];
+        }
+        catch
+        {
+            Email = string.Empty;
+            NotificationPreference = NotificationPreference.None;
+            FirstName = string.Empty;
+            LastName = string.Empty;
+            PaymentMethodType = string.Empty;
+            return false;
+        }
 
-        return message.CommunicationMethod.TryGetValue("Email", out Email) &&
-               message.RelatedEntities.TryGetValue("FirstName", out FirstName) &&
-               message.RelatedEntities.TryGetValue("LastName", out LastName) &&
-               message.MessageData.TryGetValue("PaymentMethodType", out PaymentMethodType);
+        return true;
     }
 
     private async Task ProcessPhotoUploaded(ServiceBusCommsMessage message)
     {
-        if (!ValidatePhotoUploaded(message, out var Email, out var FirstName, out var LastName))
+        if (!ValidatePhotoUploaded(message, out var Email, out var NotificationPreference, out var FirstName, out var LastName))
         {
             throw new ArgumentException("Required data missing for PhotoUploaded message");
         }
@@ -134,15 +148,25 @@ public class MessageProcessor : IMessageProcessor
         await _telegramBot.SendChannelMessageAsync($"{FirstName} {LastName} Uploaded Photo");
     }
 
-    private bool ValidatePhotoUploaded(ServiceBusCommsMessage message, out string Email, out string FirstName, out string LastName)
+    private bool ValidatePhotoUploaded(ServiceBusCommsMessage message, out string Email, out NotificationPreference NotificationPreference, out string FirstName, out string LastName)
     {
-        Email = string.Empty;
-        FirstName = string.Empty;
-        LastName = string.Empty;
+        try
+        {
+            Email = message.CommunicationMethod["Email"];
+            NotificationPreference = Enum.Parse<NotificationPreference>(message.CommunicationMethod["NotificationPreference"]);
+            FirstName = message.RelatedEntities["FirstName"];
+            LastName = message.RelatedEntities["LastName"];
+        }
+        catch
+        {
+            Email = string.Empty;
+            NotificationPreference = NotificationPreference.None;
+            FirstName = string.Empty;
+            LastName = string.Empty;
+            return false;
+        }
 
-        return message.CommunicationMethod.TryGetValue("Email", out Email) &&
-               message.RelatedEntities.TryGetValue("FirstName", out FirstName) &&
-               message.RelatedEntities.TryGetValue("LastName", out LastName);
+        return true;
     }
 
     private async Task ProcessCreateSession(ServiceBusCommsMessage message)
@@ -172,7 +196,6 @@ public class MessageProcessor : IMessageProcessor
             Note = string.Empty;
             CreatedByName = string.Empty;
             SessionUrl = string.Empty;
-
             return false;
         }
 
@@ -181,7 +204,7 @@ public class MessageProcessor : IMessageProcessor
 
     private async Task ProcessSignedIn(ServiceBusCommsMessage message)
     {
-        if (!ValidateSignedInMessage(message, out var Email, out var FirstName, out var LastName))
+        if (!ValidateSignedInMessage(message, out var Email, out var NotificationPreference, out var FirstName, out var LastName))
         {
             throw new ArgumentException("Required data missing for SignedIn message");
         }
@@ -189,20 +212,30 @@ public class MessageProcessor : IMessageProcessor
         await _telegramBot.SendChannelMessageAsync($"{FirstName} {LastName} Signed In");
     }
 
-    private bool ValidateSignedInMessage(ServiceBusCommsMessage message, out string Email, out string FirstName, out string LastName)
+    private bool ValidateSignedInMessage(ServiceBusCommsMessage message, out string Email, out NotificationPreference NotificationPreference, out string FirstName, out string LastName)
     {
-        Email = string.Empty;
-        FirstName = string.Empty;
-        LastName = string.Empty;
+        try
+        {
+            Email = message.CommunicationMethod["Email"];
+            NotificationPreference = Enum.Parse<NotificationPreference>(message.CommunicationMethod["NotificationPreference"]);
+            FirstName = message.RelatedEntities["FirstName"];
+            LastName = message.RelatedEntities["LastName"];
+        }
+        catch
+        {
+            Email = string.Empty;
+            NotificationPreference = NotificationPreference.None;
+            FirstName = string.Empty;
+            LastName = string.Empty;
+            return false;
+        }
 
-        return message.CommunicationMethod.TryGetValue("Email", out Email) &&
-               message.RelatedEntities.TryGetValue("FirstName", out FirstName) &&
-               message.RelatedEntities.TryGetValue("LastName", out LastName);
+        return true;
     }
 
     private async Task ProcessRegisterConfirmation(ServiceBusCommsMessage message)
     {
-        if (!ValidateRegisterConfirmationMessage(message, out var Email, out var UserId, out var FirstName, out var LastName, out var ConfirmationUrl))
+        if (!ValidateRegisterConfirmationMessage(message, out var Email, out var NotificationPreference, out var UserId, out var FirstName, out var LastName, out var ConfirmationUrl))
         {
             throw new ArgumentException("Required data missing for RegisterConfirmation message");
         }
@@ -212,25 +245,34 @@ public class MessageProcessor : IMessageProcessor
         await _commsHandler.SendRegistrationConfirmationEmail(Email, UserId, FirstName, LastName, ConfirmationUrl);
     }
 
-    private bool ValidateRegisterConfirmationMessage(ServiceBusCommsMessage message, out string Email, out string UserId, out string FirstName, out string LastName, out string ConfirmationUrl)
+    private bool ValidateRegisterConfirmationMessage(ServiceBusCommsMessage message, out string Email, out NotificationPreference NotificationPreference, out string UserId, out string FirstName, out string LastName, out string ConfirmationUrl)
     {
-        Email = string.Empty;
-        UserId = string.Empty;
-        FirstName = string.Empty;
-        LastName = string.Empty;
-        ConfirmationUrl = string.Empty;
+        try
+        {
+            Email = message.CommunicationMethod["Email"];
+            NotificationPreference = Enum.Parse<NotificationPreference>(message.CommunicationMethod["NotificationPreference"]);
+            UserId = message.RelatedEntities["UserId"];
+            FirstName = message.RelatedEntities["FirstName"];
+            LastName = message.RelatedEntities["LastName"];
+            ConfirmationUrl = message.MessageData["ConfirmationUrl"];
+        }
+        catch
+        {
+            Email = string.Empty;
+            NotificationPreference = NotificationPreference.None;
+            UserId = string.Empty;
+            FirstName = string.Empty;
+            LastName = string.Empty;
+            ConfirmationUrl = string.Empty;
+            return false;
+        }
 
-        return message.CommunicationMethod.TryGetValue("Email", out Email) &&
-               message.MessageData?.TryGetValue("ConfirmationUrl", out ConfirmationUrl) == true &&
-               message.RelatedEntities.TryGetValue("UserId", out UserId) &&
-               message.RelatedEntities.TryGetValue("FirstName", out FirstName) &&
-               message.RelatedEntities.TryGetValue("LastName", out LastName);
-
+        return true;
     }
 
     private async Task ProcessForgotPassword(ServiceBusCommsMessage message)
     {
-        if (!ValidateForgotPasswordMessage(message, out var Email, out var UserId, out var FirstName, out var LastName, out var ResetUrl))
+        if (!ValidateForgotPasswordMessage(message, out var Email, out var NotificationPreference, out var UserId, out var FirstName, out var LastName, out var ResetUrl))
         {
             throw new ArgumentException("Required data missing for ForgotPassword message");
         }
@@ -240,20 +282,29 @@ public class MessageProcessor : IMessageProcessor
         await _commsHandler.SendForgotPasswordEmail(Email, UserId, FirstName, LastName, ResetUrl);
     }
 
-    private bool ValidateForgotPasswordMessage(ServiceBusCommsMessage message, out string Email, out string UserId, out string FirstName, out string LastName, out string ResetUrl)
+    private bool ValidateForgotPasswordMessage(ServiceBusCommsMessage message, out string Email, out NotificationPreference NotificationPreference, out string UserId, out string FirstName, out string LastName, out string ResetUrl)
     {
-        Email = string.Empty;
-        UserId = string.Empty;
-        FirstName = string.Empty;
-        LastName = string.Empty;
-        ResetUrl = string.Empty;
+        try
+        {
+            Email = message.CommunicationMethod["Email"];
+            NotificationPreference = Enum.Parse<NotificationPreference>(message.CommunicationMethod["NotificationPreference"]);
+            UserId = message.RelatedEntities["UserId"];
+            FirstName = message.RelatedEntities["FirstName"];
+            LastName = message.RelatedEntities["LastName"];
+            ResetUrl = message.MessageData["ResetUrl"];
+        }
+        catch
+        {
+            Email = string.Empty;
+            NotificationPreference = NotificationPreference.None;
+            UserId = string.Empty;
+            FirstName = string.Empty;
+            LastName = string.Empty;
+            ResetUrl = string.Empty;
+            return false;
+        }
 
-        return message.CommunicationMethod.TryGetValue("Email", out Email) &&
-               message.MessageData?.TryGetValue("ResetUrl", out ResetUrl) == true &&
-               message.RelatedEntities.TryGetValue("UserId", out UserId) &&
-               message.RelatedEntities.TryGetValue("FirstName", out FirstName) &&
-               message.RelatedEntities.TryGetValue("LastName", out LastName);
-
+        return true;
     }
 }
 #pragma warning restore IDE0059 // Unnecessary assignment of a value

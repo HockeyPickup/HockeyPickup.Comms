@@ -15,9 +15,6 @@ namespace HockeyPickup.Comms.Services;
 public class CheckCalendarFunction
 {
     private readonly string CalendarUrl = Environment.GetEnvironmentVariable("CalendarUrl");
-    private readonly string SendGridApiKey = Environment.GetEnvironmentVariable("SendGridApiKey");
-    private readonly string SendGridNotificationAddress = Environment.GetEnvironmentVariable("SendGridNotificationAddress");
-    private readonly string SendGridFromAddress = Environment.GetEnvironmentVariable("SendGridFromAddress");
 
     private readonly ILogger _logger;
     private readonly InMemoryLoggerProvider _loggerProvider;

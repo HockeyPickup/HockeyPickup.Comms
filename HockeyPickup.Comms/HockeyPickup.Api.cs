@@ -2564,7 +2564,7 @@ namespace HockeyPickup.Api
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
                     request_.Content = new System.Net.Http.StringContent(string.Empty, System.Text.Encoding.UTF8, "application/json");
-                    request_.Method = new System.Net.Http.HttpMethod("POST");
+                    request_.Method = new System.Net.Http.HttpMethod("PUT");
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -2717,7 +2717,7 @@ namespace HockeyPickup.Api
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
                     request_.Content = new System.Net.Http.StringContent(string.Empty, System.Text.Encoding.UTF8, "application/json");
-                    request_.Method = new System.Net.Http.HttpMethod("POST");
+                    request_.Method = new System.Net.Http.HttpMethod("PUT");
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -2841,7 +2841,313 @@ namespace HockeyPickup.Api
         }
 
         /// <summary>
-        /// Gets a specific BuySell by ID
+        /// Unconfirm payment sent for a BuySell
+        /// </summary>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        public virtual System.Threading.Tasks.Task<ApiDataResponseOfBuySellResponse> UnconfirmPaymentSentAsync(int buySellId)
+        {
+            return UnconfirmPaymentSentAsync(buySellId, System.Threading.CancellationToken.None);
+        }
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// Unconfirm payment sent for a BuySell
+        /// </summary>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        public virtual async System.Threading.Tasks.Task<ApiDataResponseOfBuySellResponse> UnconfirmPaymentSentAsync(int buySellId, System.Threading.CancellationToken cancellationToken)
+        {
+            if (buySellId == null)
+                throw new System.ArgumentNullException("buySellId");
+
+            var urlBuilder_ = new System.Text.StringBuilder();
+            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/BuySell/{buySellId}/unconfirm-payment-sent");
+            urlBuilder_.Replace("{buySellId}", System.Uri.EscapeDataString(ConvertToString(buySellId, System.Globalization.CultureInfo.InvariantCulture)));
+
+            var client_ = _httpClient;
+            var disposeClient_ = false;
+            try
+            {
+                using (var request_ = new System.Net.Http.HttpRequestMessage())
+                {
+                    request_.Content = new System.Net.Http.StringContent(string.Empty, System.Text.Encoding.UTF8, "application/json");
+                    request_.Method = new System.Net.Http.HttpMethod("PUT");
+                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+                    PrepareRequest(client_, request_, urlBuilder_);
+
+                    var url_ = urlBuilder_.ToString();
+                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
+
+                    PrepareRequest(client_, request_, url_);
+
+                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    var disposeResponse_ = true;
+                    try
+                    {
+                        var headers_ = System.Linq.Enumerable.ToDictionary(response_.Headers, h_ => h_.Key, h_ => h_.Value);
+                        if (response_.Content != null && response_.Content.Headers != null)
+                        {
+                            foreach (var item_ in response_.Content.Headers)
+                                headers_[item_.Key] = item_.Value;
+                        }
+
+                        ProcessResponse(client_, response_);
+
+                        var status_ = (int)response_.StatusCode;
+                        if (status_ == 401)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("A server side error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 403)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("A server side error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("A server side error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 406)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("A server side error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 429)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("A server side error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 409)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("A server side error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 200)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ApiDataResponseOfBuySellResponse>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            return objectResponse_.Object;
+                        }
+                        else
+                        if (status_ == 400)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ApiDataResponseOfBuySellResponse>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ApiDataResponseOfBuySellResponse>("A server side error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
+                    }
+                    finally
+                    {
+                        if (disposeResponse_)
+                            response_.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeClient_)
+                    client_.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Unconfirm payment received for a BuySell
+        /// </summary>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        public virtual System.Threading.Tasks.Task<ApiDataResponseOfBuySellResponse> UnconfirmPaymentReceivedAsync(int buySellId)
+        {
+            return UnconfirmPaymentReceivedAsync(buySellId, System.Threading.CancellationToken.None);
+        }
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// Unconfirm payment received for a BuySell
+        /// </summary>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        public virtual async System.Threading.Tasks.Task<ApiDataResponseOfBuySellResponse> UnconfirmPaymentReceivedAsync(int buySellId, System.Threading.CancellationToken cancellationToken)
+        {
+            if (buySellId == null)
+                throw new System.ArgumentNullException("buySellId");
+
+            var urlBuilder_ = new System.Text.StringBuilder();
+            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/BuySell/{buySellId}/unconfirm-payment-received");
+            urlBuilder_.Replace("{buySellId}", System.Uri.EscapeDataString(ConvertToString(buySellId, System.Globalization.CultureInfo.InvariantCulture)));
+
+            var client_ = _httpClient;
+            var disposeClient_ = false;
+            try
+            {
+                using (var request_ = new System.Net.Http.HttpRequestMessage())
+                {
+                    request_.Content = new System.Net.Http.StringContent(string.Empty, System.Text.Encoding.UTF8, "application/json");
+                    request_.Method = new System.Net.Http.HttpMethod("PUT");
+                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+                    PrepareRequest(client_, request_, urlBuilder_);
+
+                    var url_ = urlBuilder_.ToString();
+                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
+
+                    PrepareRequest(client_, request_, url_);
+
+                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    var disposeResponse_ = true;
+                    try
+                    {
+                        var headers_ = System.Linq.Enumerable.ToDictionary(response_.Headers, h_ => h_.Key, h_ => h_.Value);
+                        if (response_.Content != null && response_.Content.Headers != null)
+                        {
+                            foreach (var item_ in response_.Content.Headers)
+                                headers_[item_.Key] = item_.Value;
+                        }
+
+                        ProcessResponse(client_, response_);
+
+                        var status_ = (int)response_.StatusCode;
+                        if (status_ == 401)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("A server side error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 403)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("A server side error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("A server side error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 406)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("A server side error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 429)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("A server side error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 409)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("A server side error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 200)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ApiDataResponseOfBuySellResponse>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            return objectResponse_.Object;
+                        }
+                        else
+                        if (status_ == 400)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ApiDataResponseOfBuySellResponse>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ApiDataResponseOfBuySellResponse>("A server side error occurred.", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
+                    }
+                    finally
+                    {
+                        if (disposeResponse_)
+                            response_.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeClient_)
+                    client_.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Gets a specific BuySell by Id
         /// </summary>
         /// <exception cref="ApiException">A server side error occurred.</exception>
         public virtual System.Threading.Tasks.Task<ApiDataResponseOfBuySellResponse> GetBuySellAsync(int buySellId)
@@ -2851,7 +3157,7 @@ namespace HockeyPickup.Api
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
-        /// Gets a specific BuySell by ID
+        /// Gets a specific BuySell by Id
         /// </summary>
         /// <exception cref="ApiException">A server side error occurred.</exception>
         public virtual async System.Threading.Tasks.Task<ApiDataResponseOfBuySellResponse> GetBuySellAsync(int buySellId, System.Threading.CancellationToken cancellationToken)
@@ -7337,7 +7643,7 @@ namespace HockeyPickup.Api
         }
 
         /// <summary>
-        /// Returns a specific user by their ID
+        /// Returns a specific user by their Id
         /// </summary>
         /// <exception cref="ApiException">A server side error occurred.</exception>
         public virtual System.Threading.Tasks.Task<UserDetailedResponse> GetUserByIdAsync(string userId)
@@ -7347,7 +7653,7 @@ namespace HockeyPickup.Api
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
-        /// Returns a specific user by their ID
+        /// Returns a specific user by their Id
         /// </summary>
         /// <exception cref="ApiException">A server side error occurred.</exception>
         public virtual async System.Threading.Tasks.Task<UserDetailedResponse> GetUserByIdAsync(string userId, System.Threading.CancellationToken cancellationToken)
@@ -9161,8 +9467,14 @@ namespace HockeyPickup.Api
         [Newtonsoft.Json.JsonProperty("SessionId", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int SessionId { get; set; }
 
+        [Newtonsoft.Json.JsonProperty("BuyerUserId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string BuyerUserId { get; set; }
+
         [Newtonsoft.Json.JsonProperty("BuyerName", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string BuyerName { get; set; }
+
+        [Newtonsoft.Json.JsonProperty("SellerUserId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public string SellerUserId { get; set; }
 
         [Newtonsoft.Json.JsonProperty("SellerName", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string SellerName { get; set; }
@@ -9188,6 +9500,12 @@ namespace HockeyPickup.Api
 
         [Newtonsoft.Json.JsonProperty("SellerNote", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string SellerNote { get; set; }
+
+        [Newtonsoft.Json.JsonProperty("Buyer", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public AspNetUser Buyer { get; set; }
+
+        [Newtonsoft.Json.JsonProperty("Seller", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public AspNetUser Seller { get; set; }
 
     }
 
@@ -9508,7 +9826,7 @@ namespace HockeyPickup.Api
     public partial class AdminUserUpdateRequest : SaveUserRequestEx
     {
         /// <summary>
-        /// ID of the user to update
+        /// Id of the user to update
         /// </summary>
         [Newtonsoft.Json.JsonProperty("UserId", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
@@ -9622,14 +9940,14 @@ namespace HockeyPickup.Api
         public int BuySellId { get; set; }
 
         /// <summary>
-        /// User ID of the buyer
+        /// User Id of the buyer
         /// </summary>
         [Newtonsoft.Json.JsonProperty("BuyerUserId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(128)]
         public string BuyerUserId { get; set; }
 
         /// <summary>
-        /// User ID of the seller
+        /// User Id of the seller
         /// </summary>
         [Newtonsoft.Json.JsonProperty("SellerUserId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(128)]
@@ -9696,14 +10014,14 @@ namespace HockeyPickup.Api
         public PaymentMethodType? PaymentMethod { get; set; }
 
         /// <summary>
-        /// User ID creating BuySell
+        /// User Id creating BuySell
         /// </summary>
         [Newtonsoft.Json.JsonProperty("CreateByUserId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(128)]
         public string CreateByUserId { get; set; }
 
         /// <summary>
-        /// User ID updating BuySell
+        /// User Id updating BuySell
         /// </summary>
         [Newtonsoft.Json.JsonProperty("UpdateByUserId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(128)]
@@ -9838,7 +10156,7 @@ namespace HockeyPickup.Api
         public string Token { get; set; }
 
         /// <summary>
-        /// User ID of the impersonated user
+        /// User Id of the impersonated user
         /// </summary>
         [Newtonsoft.Json.JsonProperty("ImpersonatedUserId", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
@@ -9846,7 +10164,7 @@ namespace HockeyPickup.Api
         public string ImpersonatedUserId { get; set; }
 
         /// <summary>
-        /// User ID of the original admin user
+        /// User Id of the original admin user
         /// </summary>
         [Newtonsoft.Json.JsonProperty("OriginalUserId", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
@@ -9872,7 +10190,7 @@ namespace HockeyPickup.Api
     public partial class ImpersonationRequest
     {
         /// <summary>
-        /// User ID of the target user to impersonate
+        /// User Id of the target user to impersonate
         /// </summary>
         [Newtonsoft.Json.JsonProperty("TargetUserId", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
@@ -9907,7 +10225,7 @@ namespace HockeyPickup.Api
         public string Token { get; set; }
 
         /// <summary>
-        /// User ID of the original admin user
+        /// User Id of the original admin user
         /// </summary>
         [Newtonsoft.Json.JsonProperty("OriginalUserId", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
@@ -9947,14 +10265,14 @@ namespace HockeyPickup.Api
         public bool IsImpersonating { get; set; }
 
         /// <summary>
-        /// Original admin user ID if impersonating
+        /// Original admin user Id if impersonating
         /// </summary>
         [Newtonsoft.Json.JsonProperty("OriginalUserId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(128)]
         public string OriginalUserId { get; set; }
 
         /// <summary>
-        /// Currently impersonated user ID
+        /// Currently impersonated user Id
         /// </summary>
         [Newtonsoft.Json.JsonProperty("ImpersonatedUserId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(128)]
@@ -10118,13 +10436,13 @@ namespace HockeyPickup.Api
     public partial class UpdateRegularPositionRequest
     {
         /// <summary>
-        /// Regular Set ID
+        /// Regular Set Id
         /// </summary>
         [Newtonsoft.Json.JsonProperty("RegularSetId", Required = Newtonsoft.Json.Required.Always)]
         public int RegularSetId { get; set; }
 
         /// <summary>
-        /// User ID
+        /// User Id
         /// </summary>
         [Newtonsoft.Json.JsonProperty("UserId", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
@@ -10144,13 +10462,13 @@ namespace HockeyPickup.Api
     public partial class UpdateRegularTeamRequest
     {
         /// <summary>
-        /// Regular Set ID
+        /// Regular Set Id
         /// </summary>
         [Newtonsoft.Json.JsonProperty("RegularSetId", Required = Newtonsoft.Json.Required.Always)]
         public int RegularSetId { get; set; }
 
         /// <summary>
-        /// User ID
+        /// User Id
         /// </summary>
         [Newtonsoft.Json.JsonProperty("UserId", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
@@ -10298,7 +10616,7 @@ namespace HockeyPickup.Api
         public int ActivityLogId { get; set; }
 
         /// <summary>
-        /// User ID associated with the activity
+        /// User Id associated with the activity
         /// </summary>
         [Newtonsoft.Json.JsonProperty("UserId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(128)]
@@ -10378,7 +10696,7 @@ namespace HockeyPickup.Api
         public int RegularSetId { get; set; }
 
         /// <summary>
-        /// User ID of the regular player
+        /// User Id of the regular player
         /// </summary>
         [Newtonsoft.Json.JsonProperty("UserId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(128)]
@@ -10526,7 +10844,7 @@ namespace HockeyPickup.Api
         public bool PreferredPlus { get; set; }
 
         /// <summary>
-        /// Last buy/sell transaction ID affecting this roster position
+        /// Last buy/sell transaction Id affecting this roster position
         /// </summary>
         [Newtonsoft.Json.JsonProperty("LastBuySellId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? LastBuySellId { get; set; }
@@ -10572,6 +10890,20 @@ namespace HockeyPickup.Api
         /// </summary>
         [Newtonsoft.Json.JsonProperty("SessionId", Required = Newtonsoft.Json.Required.Always)]
         public int SessionId { get; set; }
+
+        /// <summary>
+        /// User Id of the buyer
+        /// </summary>
+        [Newtonsoft.Json.JsonProperty("BuyerUserId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [System.ComponentModel.DataAnnotations.StringLength(128)]
+        public string BuyerUserId { get; set; }
+
+        /// <summary>
+        /// User Id of the seller
+        /// </summary>
+        [Newtonsoft.Json.JsonProperty("SellerUserId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [System.ComponentModel.DataAnnotations.StringLength(128)]
+        public string SellerUserId { get; set; }
 
         /// <summary>
         /// Name of the buyer
@@ -10636,6 +10968,18 @@ namespace HockeyPickup.Api
         [Newtonsoft.Json.JsonProperty("SellerNote", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(4000)]
         public string SellerNote { get; set; }
+
+        /// <summary>
+        /// Buyer details
+        /// </summary>
+        [Newtonsoft.Json.JsonProperty("Buyer", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public UserDetailedResponse Buyer { get; set; }
+
+        /// <summary>
+        /// Seller details
+        /// </summary>
+        [Newtonsoft.Json.JsonProperty("Seller", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public UserDetailedResponse Seller { get; set; }
 
     }
 
@@ -10750,13 +11094,13 @@ namespace HockeyPickup.Api
     public partial class UpdateRosterPositionRequest
     {
         /// <summary>
-        /// Session ID
+        /// Session Id
         /// </summary>
         [Newtonsoft.Json.JsonProperty("SessionId", Required = Newtonsoft.Json.Required.Always)]
         public int SessionId { get; set; }
 
         /// <summary>
-        /// User ID
+        /// User Id
         /// </summary>
         [Newtonsoft.Json.JsonProperty("UserId", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
@@ -10776,13 +11120,13 @@ namespace HockeyPickup.Api
     public partial class UpdateRosterTeamRequest
     {
         /// <summary>
-        /// Session ID
+        /// Session Id
         /// </summary>
         [Newtonsoft.Json.JsonProperty("SessionId", Required = Newtonsoft.Json.Required.Always)]
         public int SessionId { get; set; }
 
         /// <summary>
-        /// User ID
+        /// User Id
         /// </summary>
         [Newtonsoft.Json.JsonProperty("UserId", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]

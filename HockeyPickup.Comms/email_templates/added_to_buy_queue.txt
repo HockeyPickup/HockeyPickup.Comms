@@ -1,0 +1,24 @@
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 10px; color: #333;">
+    <div style="background: #ffffff; padding: 10px; border-radius: 5px;">
+        <h1 style="color: #2C5282; margin-bottom: 10px; font-size: 24px;">Added to Buy Queue for {{SESSIONDATE}}</h1>
+
+        <p style="margin-bottom: 10px; line-height: 1.5;">You've been added to the buying queue. You'll be notified when a spot becomes available.</p>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="{{SESSIONURL}}" style="background-color: #2C5282; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">View Session Details</a>
+        </div>
+
+        <div style="margin: 20px 0; padding: 15px; background-color: #F7FAFC; border-radius: 5px;">
+            <p style="margin: 0; font-weight: bold;">What happens next?</p>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li>You'll be notified when a spot becomes available</li>
+                <li>Spots are assigned on a first-come, first-served basis</li>
+                <li>You can cancel your queue position at any time</li>
+            </ul>
+        </div>
+    </div>
+
+    <div style="margin-top: 10px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666; text-align: center;">
+        <p>This email was sent to {{EMAIL}}.<br>
+    </div>
+</div>

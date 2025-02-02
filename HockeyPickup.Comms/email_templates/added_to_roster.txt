@@ -1,0 +1,24 @@
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 10px; color: #333;">
+    <div style="background: #ffffff; padding: 10px; border-radius: 5px;">
+        <h1 style="color: #2C5282; margin-bottom: 10px; font-size: 24px;">Added to Roster for {{SESSIONDATE}}</h1>
+
+        <p style="margin-bottom: 10px; line-height: 1.5;">You've been added to the roster. Looking forward to seeing you on the ice!</p>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="{{SESSIONURL}}" style="background-color: #2C5282; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">View Session Details</a>
+        </div>
+
+        <div style="margin: 20px 0; padding: 15px; background-color: #F7FAFC; border-radius: 5px;">
+            <p style="margin: 0; font-weight: bold;">Session Information:</p>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li>Date: {{SESSIONDATE}}</li>
+                <li>You can manage your spot through the session details page</li>
+                <li>If you need to sell your spot, you can do so through the system</li>
+            </ul>
+        </div>
+    </div>
+
+    <div style="margin-top: 10px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666; text-align: center;">
+        <p>This email was sent to {{EMAIL}}.<br>
+    </div>
+</div>

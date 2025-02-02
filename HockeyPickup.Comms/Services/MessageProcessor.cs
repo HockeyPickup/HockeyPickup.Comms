@@ -3,6 +3,7 @@
 using Microsoft.Extensions.Logging;
 using HockeyPickup.Api;
 using HockeyPickup.Comms.Services;
+using Newtonsoft.Json;
 
 public interface IMessageProcessor
 {
@@ -28,37 +29,66 @@ public class MessageProcessor : IMessageProcessor
 
         switch (message.Metadata["Type"])
         {
-            case "SignedIn":
-                await ProcessSignedIn(message);
-                break;
-
-            case "RegisterConfirmation":
-                await ProcessRegisterConfirmation(message);
+            // User messages
+            case "AddedPaymentMethod":
+                await ProcessAddedPaymentMethod(message);
                 break;
 
             case "ForgotPassword":
                 await ProcessForgotPassword(message);
                 break;
 
-            case "CreateSession":
-                await ProcessCreateSession(message);
-                break;
-
             case "PhotoUploaded":
                 await ProcessPhotoUploaded(message);
                 break;
 
-            case "AddedPaymentMethod":
-                await ProcessAddedPaymentMethod(message);
+            case "RegisterConfirmation":
+                await ProcessRegisterConfirmation(message);
+                break;
+
+            case "SignedIn":
+                await ProcessSignedIn(message);
+                break;
+
+            // Session messages
+            case "AddedToRoster":
+                await ProcessGenericMessage(message);
+                break;
+
+            case "CreateSession":
+                await ProcessCreateSession(message);
+                break;
+
+            case "DeletedFromRoster":
+                await ProcessGenericMessage(message);
                 break;
 
             case "TeamAssignmentChange":
                 await ProcessTeamAssignmentChange(message);
                 break;
 
+            // BuySell messages
+            case "AddedToBuyQueue":
+            case "AddedToSellQueue":
+            case "BoughtSpotFromBuyer":
+            case "SoldSpotToBuyer":
+            case "CancelledBuyQueuePosition":
+            case "CancelledSellQueuePosition":
+                await ProcessGenericMessage(message);
+                break;
+
             default:
                 throw new ArgumentException($"Unknown message type: {message.Metadata["Type"]}");
         }
+    }
+
+    private async Task ProcessGenericMessage(ServiceBusCommsMessage message)
+    {
+        await _telegramBot.SendChannelMessageAsync($"{message.Metadata["Type"]} Received\r\n\r\n" +
+            $"CommunicationMethod:\r\n{JsonConvert.SerializeObject(message.CommunicationMethod, Formatting.Indented)}\r\n" +
+            $"MessageData:\r\n{JsonConvert.SerializeObject(message.MessageData, Formatting.Indented)}\r\n" +
+            $"RelatedEntities:\r\n{JsonConvert.SerializeObject(message.RelatedEntities, Formatting.Indented)}"
+        );
     }
 
     private async Task ProcessTeamAssignmentChange(ServiceBusCommsMessage message)

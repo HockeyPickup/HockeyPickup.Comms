@@ -8,6 +8,33 @@ using Newtonsoft.Json;
 public interface IMessageProcessor
 {
     Task ProcessMessageAsync(ServiceBusCommsMessage message);
+    Task ProcessAddedPaymentMethod(ServiceBusCommsMessage message);
+    Task ProcessForgotPassword(ServiceBusCommsMessage message);
+    Task ProcessPhotoUploaded(ServiceBusCommsMessage message);
+    Task ProcessRegisterConfirmation(ServiceBusCommsMessage message);
+    Task ProcessSignedIn(ServiceBusCommsMessage message);
+    Task ProcessCreateSession(ServiceBusCommsMessage message);
+    Task ProcessTeamAssignmentChange(ServiceBusCommsMessage message);
+    Task ProcessAddedToRoster(ServiceBusCommsMessage message);
+    Task ProcessDeletedFromRoster(ServiceBusCommsMessage message);
+    Task ProcessAddedToBuyQueue(ServiceBusCommsMessage message);
+    Task ProcessAddedToSellQueue(ServiceBusCommsMessage message);
+    Task ProcessBoughtSpotFromSeller(ServiceBusCommsMessage message);
+    Task ProcessSoldSpotToBuyer(ServiceBusCommsMessage message);
+    Task ProcessCancelledBuyQueue(ServiceBusCommsMessage message);
+    Task ProcessCancelledSellQueue(ServiceBusCommsMessage message);
+
+    bool ValidateAddedPaymentMethod(ServiceBusCommsMessage message, out string email, out NotificationPreference notificationPreference, out string firstName, out string lastName, out string paymentMethodType);
+    bool ValidatePhotoUploaded(ServiceBusCommsMessage message, out string email, out NotificationPreference notificationPreference, out string firstName, out string lastName);
+    bool ValidateSignedInMessage(ServiceBusCommsMessage message, out string email, out NotificationPreference notificationPreference, out string firstName, out string lastName);
+    bool ValidateRegisterConfirmationMessage(ServiceBusCommsMessage message, out string email, out NotificationPreference notificationPreference, out string userId, out string firstName, out string lastName, out string confirmationUrl);
+    bool ValidateForgotPasswordMessage(ServiceBusCommsMessage message, out string email, out NotificationPreference notificationPreference, out string userId, out string firstName, out string lastName, out string resetUrl);
+    bool ValidateCreateSessionMessage(ServiceBusCommsMessage message, out ICollection<string> emails, out DateTime sessionDate, out string sessionUrl, out string note, out string createdByName);
+    bool ValidateTeamAssignmentChange(ServiceBusCommsMessage message, out string email, out NotificationPreference notificationPreference, out ICollection<string> emails, out string firstName, out string lastName, out DateTime sessionDate, out string sessionUrl, out string formerTeamAssignment, out string newTeamAssignment);
+    bool ValidateUserMessage(ServiceBusCommsMessage message, out string email, out NotificationPreference notificationPreference, out string firstName, out string lastName);
+    bool ValidateBuyerMessage(ServiceBusCommsMessage message, out string buyerEmail, out NotificationPreference buyerNotificationPreference, out string buyerFirstName, out string buyerLastName);
+    bool ValidateSellerMessage(ServiceBusCommsMessage message, out string sellerEmail, out NotificationPreference sellerNotificationPreference, out string sellerFirstName, out string sellerLastName);
+    bool ValidateBuySellMessage(ServiceBusCommsMessage message, out string buyerEmail, out NotificationPreference buyerNotificationPreference, out string sellerEmail, out NotificationPreference sellerNotificationPreference, out string buyerFirstName, out string buyerLastName, out string sellerFirstName, out string sellerLastName);
 }
 
 public class MessageProcessor : IMessageProcessor
@@ -50,31 +77,44 @@ public class MessageProcessor : IMessageProcessor
                 await ProcessSignedIn(message);
                 break;
 
-            // Session messages
-            case "AddedToRoster":
-                await ProcessGenericMessage(message);
-                break;
-
             case "CreateSession":
                 await ProcessCreateSession(message);
                 break;
 
+            case "AddedToRoster":
+                await ProcessAddedToRoster(message);
+                break;
+
             case "DeletedFromRoster":
-                await ProcessGenericMessage(message);
+                await ProcessDeletedFromRoster(message);
                 break;
 
             case "TeamAssignmentChange":
                 await ProcessTeamAssignmentChange(message);
                 break;
 
-            // BuySell messages
             case "AddedToBuyQueue":
+                await ProcessAddedToBuyQueue(message);
+                break;
+
             case "AddedToSellQueue":
-            case "BoughtSpotFromBuyer":
+                await ProcessAddedToSellQueue(message);
+                break;
+
+            case "BoughtSpotFromSeller":
+                await ProcessBoughtSpotFromSeller(message);
+                break;
+
             case "SoldSpotToBuyer":
+                await ProcessSoldSpotToBuyer(message);
+                break;
+
             case "CancelledBuyQueuePosition":
+                await ProcessCancelledBuyQueue(message);
+                break;
+
             case "CancelledSellQueuePosition":
-                await ProcessGenericMessage(message);
+                await ProcessCancelledSellQueue(message);
                 break;
 
             default:
@@ -82,7 +122,7 @@ public class MessageProcessor : IMessageProcessor
         }
     }
 
-    private async Task ProcessGenericMessage(ServiceBusCommsMessage message)
+    public async Task ProcessGenericMessage(ServiceBusCommsMessage message)
     {
         await _telegramBot.SendChannelMessageAsync($"{message.Metadata["Type"]} Received\r\n\r\n" +
             $"CommunicationMethod:\r\n{JsonConvert.SerializeObject(message.CommunicationMethod, Formatting.Indented)}\r\n" +
@@ -91,7 +131,7 @@ public class MessageProcessor : IMessageProcessor
         );
     }
 
-    private async Task ProcessTeamAssignmentChange(ServiceBusCommsMessage message)
+    public async Task ProcessTeamAssignmentChange(ServiceBusCommsMessage message)
     {
         if (!ValidateTeamAssignmentChange(message, out var Email, out var NotificationPreference, out var Emails, out var FirstName, out var LastName, out var SessionDate, out var SessionUrl, out var FormerTeamAssignment, out var NewTeamAssignment))
         {
@@ -103,7 +143,7 @@ public class MessageProcessor : IMessageProcessor
         await _commsHandler.SendTeamAssignmentChangeEmail(Email, NotificationPreference, Emails, SessionDate, SessionUrl, FirstName, LastName, FormerTeamAssignment, NewTeamAssignment);
     }
 
-    private bool ValidateTeamAssignmentChange(ServiceBusCommsMessage message, out string Email, out NotificationPreference NotificationPreference, out ICollection<string> Emails, out string FirstName, out string LastName, out DateTime SessionDate, out string SessionUrl, out string FormerTeamAssignment, out string NewTeamAssignment)
+    public bool ValidateTeamAssignmentChange(ServiceBusCommsMessage message, out string Email, out NotificationPreference NotificationPreference, out ICollection<string> Emails, out string FirstName, out string LastName, out DateTime SessionDate, out string SessionUrl, out string FormerTeamAssignment, out string NewTeamAssignment)
     {
         try
         {
@@ -135,7 +175,7 @@ public class MessageProcessor : IMessageProcessor
         return true;
     }
 
-    private async Task ProcessAddedPaymentMethod(ServiceBusCommsMessage message)
+    public async Task ProcessAddedPaymentMethod(ServiceBusCommsMessage message)
     {
         if (!ValidateAddedPaymentMethod(message, out var Email, out var NotificationPreference, out var FirstName, out var LastName, out var PaymentMethodType))
         {
@@ -145,7 +185,7 @@ public class MessageProcessor : IMessageProcessor
         await _telegramBot.SendChannelMessageAsync($"{FirstName} {LastName} Added Payment Method Type {PaymentMethodType}");
     }
 
-    private bool ValidateAddedPaymentMethod(ServiceBusCommsMessage message, out string Email, out NotificationPreference NotificationPreference, out string FirstName, out string LastName, out string PaymentMethodType)
+    public bool ValidateAddedPaymentMethod(ServiceBusCommsMessage message, out string Email, out NotificationPreference NotificationPreference, out string FirstName, out string LastName, out string PaymentMethodType)
     {
         try
         {
@@ -168,7 +208,7 @@ public class MessageProcessor : IMessageProcessor
         return true;
     }
 
-    private async Task ProcessPhotoUploaded(ServiceBusCommsMessage message)
+    public async Task ProcessPhotoUploaded(ServiceBusCommsMessage message)
     {
         if (!ValidatePhotoUploaded(message, out var Email, out var NotificationPreference, out var FirstName, out var LastName))
         {
@@ -178,7 +218,7 @@ public class MessageProcessor : IMessageProcessor
         await _telegramBot.SendChannelMessageAsync($"{FirstName} {LastName} Uploaded Photo");
     }
 
-    private bool ValidatePhotoUploaded(ServiceBusCommsMessage message, out string Email, out NotificationPreference NotificationPreference, out string FirstName, out string LastName)
+    public bool ValidatePhotoUploaded(ServiceBusCommsMessage message, out string Email, out NotificationPreference NotificationPreference, out string FirstName, out string LastName)
     {
         try
         {
@@ -199,7 +239,7 @@ public class MessageProcessor : IMessageProcessor
         return true;
     }
 
-    private async Task ProcessCreateSession(ServiceBusCommsMessage message)
+    public async Task ProcessCreateSession(ServiceBusCommsMessage message)
     {
         if (!ValidateCreateSessionMessage(message, out var Emails, out var SessionDate, out var SessionUrl, out var Note, out var CreatedByName))
         {
@@ -209,7 +249,7 @@ public class MessageProcessor : IMessageProcessor
         await _commsHandler.SendCreateSessionEmails(Emails, SessionDate, SessionUrl, Note, CreatedByName);
     }
 
-    private bool ValidateCreateSessionMessage(ServiceBusCommsMessage message, out ICollection<string> Emails, out DateTime SessionDate, out string SessionUrl, out string Note, out string CreatedByName)
+    public bool ValidateCreateSessionMessage(ServiceBusCommsMessage message, out ICollection<string> Emails, out DateTime SessionDate, out string SessionUrl, out string Note, out string CreatedByName)
     {
         try
         {
@@ -232,7 +272,7 @@ public class MessageProcessor : IMessageProcessor
         return true;
     }
 
-    private async Task ProcessSignedIn(ServiceBusCommsMessage message)
+    public async Task ProcessSignedIn(ServiceBusCommsMessage message)
     {
         if (!ValidateSignedInMessage(message, out var Email, out var NotificationPreference, out var FirstName, out var LastName))
         {
@@ -242,7 +282,7 @@ public class MessageProcessor : IMessageProcessor
         await _telegramBot.SendChannelMessageAsync($"{FirstName} {LastName} Signed In");
     }
 
-    private bool ValidateSignedInMessage(ServiceBusCommsMessage message, out string Email, out NotificationPreference NotificationPreference, out string FirstName, out string LastName)
+    public bool ValidateSignedInMessage(ServiceBusCommsMessage message, out string Email, out NotificationPreference NotificationPreference, out string FirstName, out string LastName)
     {
         try
         {
@@ -263,7 +303,7 @@ public class MessageProcessor : IMessageProcessor
         return true;
     }
 
-    private async Task ProcessRegisterConfirmation(ServiceBusCommsMessage message)
+    public async Task ProcessRegisterConfirmation(ServiceBusCommsMessage message)
     {
         if (!ValidateRegisterConfirmationMessage(message, out var Email, out var NotificationPreference, out var UserId, out var FirstName, out var LastName, out var ConfirmationUrl))
         {
@@ -275,7 +315,7 @@ public class MessageProcessor : IMessageProcessor
         await _commsHandler.SendRegistrationConfirmationEmail(Email, UserId, FirstName, LastName, ConfirmationUrl);
     }
 
-    private bool ValidateRegisterConfirmationMessage(ServiceBusCommsMessage message, out string Email, out NotificationPreference NotificationPreference, out string UserId, out string FirstName, out string LastName, out string ConfirmationUrl)
+    public bool ValidateRegisterConfirmationMessage(ServiceBusCommsMessage message, out string Email, out NotificationPreference NotificationPreference, out string UserId, out string FirstName, out string LastName, out string ConfirmationUrl)
     {
         try
         {
@@ -300,7 +340,7 @@ public class MessageProcessor : IMessageProcessor
         return true;
     }
 
-    private async Task ProcessForgotPassword(ServiceBusCommsMessage message)
+    public async Task ProcessForgotPassword(ServiceBusCommsMessage message)
     {
         if (!ValidateForgotPasswordMessage(message, out var Email, out var NotificationPreference, out var UserId, out var FirstName, out var LastName, out var ResetUrl))
         {
@@ -312,7 +352,7 @@ public class MessageProcessor : IMessageProcessor
         await _commsHandler.SendForgotPasswordEmail(Email, UserId, FirstName, LastName, ResetUrl);
     }
 
-    private bool ValidateForgotPasswordMessage(ServiceBusCommsMessage message, out string Email, out NotificationPreference NotificationPreference, out string UserId, out string FirstName, out string LastName, out string ResetUrl)
+    public bool ValidateForgotPasswordMessage(ServiceBusCommsMessage message, out string Email, out NotificationPreference NotificationPreference, out string UserId, out string FirstName, out string LastName, out string ResetUrl)
     {
         try
         {
@@ -335,6 +375,275 @@ public class MessageProcessor : IMessageProcessor
         }
 
         return true;
+    }
+
+    public async Task ProcessAddedToRoster(ServiceBusCommsMessage message)
+    {
+        if (!ValidateUserMessage(message, out var email, out var notificationPreference, out var firstName, out var lastName))
+        {
+            throw new ArgumentException("Required data missing for AddedToRoster message");
+        }
+
+        var sessionDate = DateTime.Parse(message.MessageData["SessionDate"]);
+        var sessionUrl = message.MessageData["SessionUrl"];
+
+        await _telegramBot.SendChannelMessageAsync($"{firstName} {lastName} Added to Roster for {sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")}");
+
+        await _commsHandler.SendAddedToRosterEmails(
+            email,
+            notificationPreference,
+            message.NotificationEmails,
+            sessionDate,
+            sessionUrl,
+            firstName,
+            lastName
+        );
+    }
+
+    public async Task ProcessDeletedFromRoster(ServiceBusCommsMessage message)
+    {
+        if (!ValidateUserMessage(message, out var email, out var notificationPreference, out var firstName, out var lastName))
+        {
+            throw new ArgumentException("Required data missing for DeletedFromRoster message");
+        }
+
+        var sessionDate = DateTime.Parse(message.MessageData["SessionDate"]);
+        var sessionUrl = message.MessageData["SessionUrl"];
+
+        await _telegramBot.SendChannelMessageAsync($"{firstName} {lastName} Removed from Roster for {sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")}");
+
+        await _commsHandler.SendDeletedFromRosterEmails(
+            email,
+            notificationPreference,
+            message.NotificationEmails,
+            sessionDate,
+            sessionUrl,
+            firstName,
+            lastName
+        );
+    }
+
+    public async Task ProcessAddedToBuyQueue(ServiceBusCommsMessage message)
+    {
+        if (!ValidateBuyerMessage(message, out var buyerEmail, out var buyerNotificationPreference, out var buyerFirstName, out var buyerLastName))
+        {
+            throw new ArgumentException("Required data missing for AddedToBuyQueue message");
+        }
+
+        var sessionDate = DateTime.Parse(message.MessageData["SessionDate"]);
+        var sessionUrl = message.MessageData["SessionUrl"];
+
+        await _telegramBot.SendChannelMessageAsync($"{buyerFirstName} {buyerLastName} Added to Buy Queue for {sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")}");
+
+        await _commsHandler.SendAddedToBuyQueueEmails(
+            buyerEmail,
+            buyerNotificationPreference,
+            message.NotificationEmails,
+            sessionDate,
+            sessionUrl,
+            buyerFirstName,
+            buyerLastName
+        );
+    }
+
+    public async Task ProcessAddedToSellQueue(ServiceBusCommsMessage message)
+    {
+        if (!ValidateSellerMessage(message, out var sellerEmail, out var sellerNotificationPreference, out var sellerFirstName, out var sellerLastName))
+        {
+            throw new ArgumentException("Required data missing for AddedToSellQueue message");
+        }
+
+        var sessionDate = DateTime.Parse(message.MessageData["SessionDate"]);
+        var sessionUrl = message.MessageData["SessionUrl"];
+
+        await _telegramBot.SendChannelMessageAsync($"{sellerFirstName} {sellerLastName} Added to Sell Queue for {sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")}");
+
+        await _commsHandler.SendAddedToSellQueueEmails(
+            sellerEmail,
+            sellerNotificationPreference,
+            message.NotificationEmails,
+            sessionDate,
+            sessionUrl,
+            sellerFirstName,
+            sellerLastName
+        );
+    }
+
+    public async Task ProcessBoughtSpotFromSeller(ServiceBusCommsMessage message)
+    {
+        if (!ValidateBuySellMessage(message, out var buyerEmail, out var buyerNotificationPreference, out var sellerEmail, out var sellerNotificationPreference, out var buyerFirstName, out var buyerLastName, out var sellerFirstName, out var sellerLastName))
+        {
+            throw new ArgumentException("Required data missing for BoughtSpotFromSeller message");
+        }
+
+        var sessionDate = DateTime.Parse(message.MessageData["SessionDate"]);
+        var sessionUrl = message.MessageData["SessionUrl"];
+
+        await _telegramBot.SendChannelMessageAsync($"{buyerFirstName} {buyerLastName} bought spot from {sellerFirstName} {sellerLastName} for {sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")}");
+
+        await _commsHandler.SendBuyerSellerMatchedEmails(
+            buyerEmail,
+            buyerNotificationPreference,
+            sellerEmail,
+            sellerNotificationPreference,
+            message.NotificationEmails,
+            sessionDate,
+            sessionUrl,
+            buyerFirstName,
+            buyerLastName,
+            sellerFirstName,
+            sellerLastName
+        );
+    }
+
+    public async Task ProcessSoldSpotToBuyer(ServiceBusCommsMessage message)
+    {
+        if (!ValidateBuySellMessage(message, out var buyerEmail, out var buyerNotificationPreference, out var sellerEmail, out var sellerNotificationPreference, out var buyerFirstName, out var buyerLastName, out var sellerFirstName, out var sellerLastName))
+        {
+            throw new ArgumentException("Required data missing for SoldSpotToBuyer message");
+        }
+
+        var sessionDate = DateTime.Parse(message.MessageData["SessionDate"]);
+        var sessionUrl = message.MessageData["SessionUrl"];
+
+        await _telegramBot.SendChannelMessageAsync($"{sellerFirstName} {sellerLastName} sold spot to {buyerFirstName} {buyerLastName} for {sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")}"
+        );
+
+        await _commsHandler.SendBuyerSellerMatchedEmails(
+            buyerEmail,
+            buyerNotificationPreference,
+            sellerEmail,
+            sellerNotificationPreference,
+            message.NotificationEmails,
+            sessionDate,
+            sessionUrl,
+            buyerFirstName,
+            buyerLastName,
+            sellerFirstName,
+            sellerLastName
+        );
+    }
+
+    public async Task ProcessCancelledBuyQueue(ServiceBusCommsMessage message)
+    {
+        if (!ValidateBuyerMessage(message, out var buyerEmail, out var buyerNotificationPreference, out var buyerFirstName, out var buyerLastName))
+        {
+            throw new ArgumentException("Required data missing for CancelledBuyQueue message");
+        }
+
+        var sessionDate = DateTime.Parse(message.MessageData["SessionDate"]);
+        var sessionUrl = message.MessageData["SessionUrl"];
+
+        await _telegramBot.SendChannelMessageAsync($"{buyerFirstName} {buyerLastName} Cancelled Buy Request for {sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")}");
+
+        await _commsHandler.SendCancelledBuyQueueEmails(
+            buyerEmail,
+            buyerNotificationPreference,
+            message.NotificationEmails,
+            sessionDate,
+            sessionUrl,
+            buyerFirstName,
+            buyerLastName
+        );
+    }
+
+    public async Task ProcessCancelledSellQueue(ServiceBusCommsMessage message)
+    {
+        if (!ValidateSellerMessage(message, out var sellerEmail, out var sellerNotificationPreference, out var sellerFirstName, out var sellerLastName))
+        {
+            throw new ArgumentException("Required data missing for CancelledSellQueue message");
+        }
+
+        var sessionDate = DateTime.Parse(message.MessageData["SessionDate"]);
+        var sessionUrl = message.MessageData["SessionUrl"];
+
+        await _telegramBot.SendChannelMessageAsync($"{sellerFirstName} {sellerLastName} Cancelled Sell Request for {sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")}");
+
+        await _commsHandler.SendCancelledSellQueueEmails(
+            sellerEmail,
+            sellerNotificationPreference,
+            message.NotificationEmails,
+            sessionDate,
+            sessionUrl,
+            sellerFirstName,
+            sellerLastName
+        );
+    }
+
+    public bool ValidateUserMessage(ServiceBusCommsMessage message, out string email,
+        out NotificationPreference notificationPreference, out string firstName, out string lastName)
+    {
+        try
+        {
+            email = message.CommunicationMethod["Email"];
+            notificationPreference = Enum.Parse<NotificationPreference>(message.CommunicationMethod["NotificationPreference"]);
+            firstName = message.RelatedEntities["FirstName"];
+            lastName = message.RelatedEntities["LastName"];
+            return true;
+        }
+        catch
+        {
+            email = string.Empty;
+            notificationPreference = NotificationPreference.None;
+            firstName = string.Empty;
+            lastName = string.Empty;
+            return false;
+        }
+    }
+
+    public bool ValidateBuyerMessage(ServiceBusCommsMessage message, out string buyerEmail,
+        out NotificationPreference buyerNotificationPreference, out string buyerFirstName, out string buyerLastName)
+    {
+        try
+        {
+            buyerEmail = message.CommunicationMethod["BuyerEmail"];
+            buyerNotificationPreference = Enum.Parse<NotificationPreference>(message.CommunicationMethod["BuyerNotificationPreference"]);
+            buyerFirstName = message.RelatedEntities["BuyerFirstName"];
+            buyerLastName = message.RelatedEntities["BuyerLastName"];
+            return true;
+        }
+        catch
+        {
+            buyerEmail = string.Empty;
+            buyerNotificationPreference = NotificationPreference.None;
+            buyerFirstName = string.Empty;
+            buyerLastName = string.Empty;
+            return false;
+        }
+    }
+
+    public bool ValidateSellerMessage(ServiceBusCommsMessage message, out string sellerEmail,
+        out NotificationPreference sellerNotificationPreference, out string sellerFirstName, out string sellerLastName)
+    {
+        try
+        {
+            sellerEmail = message.CommunicationMethod["SellerEmail"];
+            sellerNotificationPreference = Enum.Parse<NotificationPreference>(message.CommunicationMethod["SellerNotificationPreference"]);
+            sellerFirstName = message.RelatedEntities["SellerFirstName"];
+            sellerLastName = message.RelatedEntities["SellerLastName"];
+            return true;
+        }
+        catch
+        {
+            sellerEmail = string.Empty;
+            sellerNotificationPreference = NotificationPreference.None;
+            sellerFirstName = string.Empty;
+            sellerLastName = string.Empty;
+            return false;
+        }
+    }
+
+    public bool ValidateBuySellMessage(ServiceBusCommsMessage message, out string buyerEmail,
+        out NotificationPreference buyerNotificationPreference, out string sellerEmail,
+        out NotificationPreference sellerNotificationPreference, out string buyerFirstName, out string buyerLastName,
+        out string sellerFirstName, out string sellerLastName)
+    {
+        sellerEmail = null!;
+        sellerNotificationPreference = default;
+        sellerFirstName = null!;
+        sellerLastName = null!;
+        return ValidateBuyerMessage(message, out buyerEmail, out buyerNotificationPreference, out buyerFirstName, out buyerLastName) &&
+            ValidateSellerMessage(message, out sellerEmail, out sellerNotificationPreference, out sellerFirstName, out sellerLastName);
     }
 }
 #pragma warning restore IDE0059 // Unnecessary assignment of a value

@@ -12,8 +12,8 @@
             <p style="margin: 0; font-weight: bold;">What happens next?</p>
             <ul style="margin: 10px 0; padding-left: 20px;">
                 <li>You'll be notified when a spot becomes available</li>
-                <li>Spots are assigned on a first-come, first-served basis</li>
-                <li>You can cancel your queue position at any time</li>
+                <li>Once you match with a seller, you are obligated to pay the seller immediately</li>
+                <li>You can cancel your queue position at any time before you are matched with a seller</li>
             </ul>
         </div>
     </div>

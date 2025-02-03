@@ -18,7 +18,22 @@ public enum EmailTemplate
     RawContent,
     CreateSession,
     TeamAssignmentChange,
-    TeamAssignmentChangeNotification
+    TeamAssignmentChangeNotification,
+    BoughtSpotBuyer,
+    BoughtSpotSeller,
+    BoughtSpotNotification,
+    AddedToBuyQueue,
+    AddedToBuyQueueNotification,
+    AddedToSellQueue,
+    AddedToSellQueueNotification,
+    CancelledBuyQueue,
+    CancelledBuyQueueNotification,
+    CancelledSellQueue,
+    CancelledSellQueueNotification,
+    AddedToRoster,
+    AddedToRosterNotification,
+    DeletedFromRoster,
+    DeletedFromRosterNotification,
     // Add more as needed
 }
 
@@ -26,6 +41,8 @@ public class EmailService : IEmailService
 {
     private readonly ILogger<EmailService> _logger;
     private readonly Dictionary<EmailTemplate, (string File, HashSet<string> RequiredTokens)> _templateConfig;
+    private readonly bool isLocalhost;
+    private readonly string? alertEmail;
 
     public EmailService(ILogger<EmailService> logger)
     {
@@ -60,7 +77,73 @@ public class EmailService : IEmailService
                 EmailTemplate.TeamAssignmentChangeNotification,
                 ("team_assignment_change_notification.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "SESSION_URL", "FIRSTNAME", "LASTNAME", "FORMERTEAMASSIGNMENT", "NEWTEAMASSIGNMENT" })
             },
+            {
+                EmailTemplate.BoughtSpotBuyer,
+                ("bought_spot_buyer.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "SELLERFIRSTNAME", "SELLERLASTNAME", "SESSIONURL" })
+            },
+            {
+                EmailTemplate.BoughtSpotSeller,
+                ("bought_spot_seller.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "BUYERFIRSTNAME", "BUYERLASTNAME", "SESSIONURL" })
+            },
+            {
+                EmailTemplate.BoughtSpotNotification,
+                ("bought_spot_notification.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "BUYERFIRSTNAME", "BUYERLASTNAME", "SELLERFIRSTNAME", "SELLERLASTNAME", "SESSIONURL" })
+            },
+            {
+                EmailTemplate.AddedToBuyQueue,
+                ("added_to_buy_queue.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "SESSIONURL" })
+            },
+            {
+                EmailTemplate.AddedToBuyQueueNotification,
+                ("added_to_buy_queue_notification.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "BUYERFIRSTNAME", "BUYERLASTNAME", "SESSIONURL" })
+            },
+            {
+                EmailTemplate.AddedToSellQueue,
+                ("added_to_sell_queue.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "SESSIONURL" })
+            },
+            {
+                EmailTemplate.AddedToSellQueueNotification,
+                ("added_to_sell_queue_notification.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "SELLERFIRSTNAME", "SELLERLASTNAME", "SESSIONURL" })
+            },
+            {
+                EmailTemplate.CancelledBuyQueue,
+                ("cancelled_buy_queue.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "SESSIONURL" })
+            },
+            {
+                EmailTemplate.CancelledBuyQueueNotification,
+                ("cancelled_buy_queue_notification.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "BUYERFIRSTNAME", "BUYERLASTNAME", "SESSIONURL" })
+            },
+            {
+                EmailTemplate.CancelledSellQueue,
+                ("cancelled_sell_queue.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "SESSIONURL" })
+            },
+            {
+                EmailTemplate.CancelledSellQueueNotification,
+                ("cancelled_sell_queue_notification.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "SELLERFIRSTNAME", "SELLERLASTNAME", "SESSIONURL" })
+            },
+            {
+                EmailTemplate.AddedToRoster,
+                ("added_to_roster.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "SESSIONURL" })
+            },
+            {
+                EmailTemplate.AddedToRosterNotification,
+                ("added_to_roster_notification.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "FIRSTNAME", "LASTNAME", "SESSIONURL" })
+            },
+            {
+                EmailTemplate.DeletedFromRoster,
+                ("deleted_from_roster.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "SESSIONURL" })
+            },
+            {
+                EmailTemplate.DeletedFromRosterNotification,
+                ("deleted_from_roster_notification.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "FIRSTNAME", "LASTNAME", "SESSIONURL" })
+            },
         };
+        var baseApiUrl = Environment.GetEnvironmentVariable("BaseApiUrl");
+        if (baseApiUrl!.Contains("localhost"))
+        {
+            isLocalhost = true;
+        }
+        alertEmail = Environment.GetEnvironmentVariable("SignInAlertEmail");
     }
 
     public async Task SendEmailAsync(string to, string subject, EmailTemplate template, Dictionary<string, string> tokens)
@@ -94,6 +177,12 @@ public class EmailService : IEmailService
 
             var message = new SendGridMessage();
             message.SetFrom(new EmailAddress(Environment.GetEnvironmentVariable("SendGridFromAddress")));
+
+            // When running locally, override the 'to'. NEVER send an email to a real user
+            if (isLocalhost && !string.IsNullOrEmpty(alertEmail))
+            {
+                to = alertEmail;
+            }
             message.AddTo(to);
             message.SetSubject(subject);
 

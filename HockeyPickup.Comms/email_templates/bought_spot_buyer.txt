@@ -1,8 +1,8 @@
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 10px; color: #333;">
     <div style="background: #ffffff; padding: 10px; border-radius: 5px;">
-        <h1 style="color: #2C5282; margin-bottom: 10px; font-size: 24px;">Your spot has been sold for {{SESSIONDATE}}.</h1>
+        <h1 style="color: #2C5282; margin-bottom: 10px; font-size: 24px;">Congratulations! You bought a spot for {{SESSIONDATE}}.</h1>
 
-        <p style="margin-bottom: 10px; line-height: 1.5;">{{BUYERFIRSTNAME}} {{BUYERLASTNAME}} has bought your spot. They will be contacting you to arrange payment.</p>
+        <p style="margin-bottom: 10px; line-height: 1.5;">You successfully bought a spot from {{SELLERFIRSTNAME}} {{SELLERLASTNAME}}. Please make the payment as soon as possible to confirm your spot.</p>
 
         <div style="text-align: center; margin: 30px 0;">
             <a href="{{SESSIONURL}}" style="background-color: #2C5282; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">View Session Details</a>
@@ -11,8 +11,9 @@
         <div style="margin: 20px 0; padding: 15px; background-color: #F7FAFC; border-radius: 5px;">
             <p style="margin: 0; font-weight: bold;">Next Steps:</p>
             <ol style="margin: 10px 0; padding-left: 20px;">
-                <li>Wait for payment from {{BUYERFIRSTNAME}}</li>
-                <li>Once received, mark payment as received in the system</li>
+                <li>Pay {{SELLERFIRSTNAME}}</li>
+                <li>Mark payment as sent in the system once you've paid</li>
+                <li>Get ready to play!</li>
             </ol>
         </div>
     </div>

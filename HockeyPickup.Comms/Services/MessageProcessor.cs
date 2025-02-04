@@ -29,8 +29,8 @@ public interface IMessageProcessor
     bool ValidateSignedInMessage(ServiceBusCommsMessage message, out string email, out NotificationPreference notificationPreference, out string firstName, out string lastName);
     bool ValidateRegisterConfirmationMessage(ServiceBusCommsMessage message, out string email, out NotificationPreference notificationPreference, out string userId, out string firstName, out string lastName, out string confirmationUrl);
     bool ValidateForgotPasswordMessage(ServiceBusCommsMessage message, out string email, out NotificationPreference notificationPreference, out string userId, out string firstName, out string lastName, out string resetUrl);
-    bool ValidateCreateSessionMessage(ServiceBusCommsMessage message, out ICollection<string> emails, out DateTime sessionDate, out string sessionUrl, out string note, out string createdByName);
-    bool ValidateTeamAssignmentChange(ServiceBusCommsMessage message, out string email, out NotificationPreference notificationPreference, out ICollection<string> emails, out string firstName, out string lastName, out DateTime sessionDate, out string sessionUrl, out string formerTeamAssignment, out string newTeamAssignment);
+    bool ValidateCreateSessionMessage(ServiceBusCommsMessage message, out DateTime sessionDate, out string sessionUrl, out string note, out string createdByName);
+    bool ValidateTeamAssignmentChange(ServiceBusCommsMessage message, out string email, out NotificationPreference notificationPreference, out string firstName, out string lastName, out DateTime sessionDate, out string sessionUrl, out string formerTeamAssignment, out string newTeamAssignment);
     bool ValidateUserMessage(ServiceBusCommsMessage message, out string email, out NotificationPreference notificationPreference, out string firstName, out string lastName);
     bool ValidateBuyerMessage(ServiceBusCommsMessage message, out string buyerEmail, out NotificationPreference buyerNotificationPreference, out string buyerFirstName, out string buyerLastName);
     bool ValidateSellerMessage(ServiceBusCommsMessage message, out string sellerEmail, out NotificationPreference sellerNotificationPreference, out string sellerFirstName, out string sellerLastName);
@@ -133,23 +133,22 @@ public class MessageProcessor : IMessageProcessor
 
     public async Task ProcessTeamAssignmentChange(ServiceBusCommsMessage message)
     {
-        if (!ValidateTeamAssignmentChange(message, out var Email, out var NotificationPreference, out var Emails, out var FirstName, out var LastName, out var SessionDate, out var SessionUrl, out var FormerTeamAssignment, out var NewTeamAssignment))
+        if (!ValidateTeamAssignmentChange(message, out var Email, out var NotificationPreference, out var FirstName, out var LastName, out var SessionDate, out var SessionUrl, out var FormerTeamAssignment, out var NewTeamAssignment))
         {
             throw new ArgumentException("Required data missing for ProcessTeamAssignmentChange message");
         }
 
         await _telegramBot.SendChannelMessageAsync($"{FirstName} {LastName} - Team Assignment Change from {FormerTeamAssignment} to {NewTeamAssignment} for Session {SessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")}");
 
-        await _commsHandler.SendTeamAssignmentChangeEmail(Email, NotificationPreference, Emails, SessionDate, SessionUrl, FirstName, LastName, FormerTeamAssignment, NewTeamAssignment);
+        await _commsHandler.SendTeamAssignmentChangeEmail(Email, NotificationPreference, message.NotificationEmails, SessionDate, SessionUrl, FirstName, LastName, FormerTeamAssignment, NewTeamAssignment);
     }
 
-    public bool ValidateTeamAssignmentChange(ServiceBusCommsMessage message, out string Email, out NotificationPreference NotificationPreference, out ICollection<string> Emails, out string FirstName, out string LastName, out DateTime SessionDate, out string SessionUrl, out string FormerTeamAssignment, out string NewTeamAssignment)
+    public bool ValidateTeamAssignmentChange(ServiceBusCommsMessage message, out string Email, out NotificationPreference NotificationPreference, out string FirstName, out string LastName, out DateTime SessionDate, out string SessionUrl, out string FormerTeamAssignment, out string NewTeamAssignment)
     {
         try
         {
             Email = message.CommunicationMethod["Email"];
             NotificationPreference = Enum.Parse<NotificationPreference>(message.CommunicationMethod["NotificationPreference"]);
-            Emails = message.NotificationEmails;
             FirstName = message.RelatedEntities["FirstName"];
             LastName = message.RelatedEntities["LastName"];
             SessionDate = DateTime.Parse(message.MessageData["SessionDate"]);
@@ -161,7 +160,6 @@ public class MessageProcessor : IMessageProcessor
         {
             Email = string.Empty;
             NotificationPreference = NotificationPreference.None;
-            Emails = Array.Empty<string>();
             FirstName = string.Empty;
             LastName = string.Empty;
             SessionDate = DateTime.MinValue;
@@ -241,19 +239,18 @@ public class MessageProcessor : IMessageProcessor
 
     public async Task ProcessCreateSession(ServiceBusCommsMessage message)
     {
-        if (!ValidateCreateSessionMessage(message, out var Emails, out var SessionDate, out var SessionUrl, out var Note, out var CreatedByName))
+        if (!ValidateCreateSessionMessage(message, out var SessionDate, out var SessionUrl, out var Note, out var CreatedByName))
         {
             throw new ArgumentException("Required data missing for CreateSession message");
         }
 
-        await _commsHandler.SendCreateSessionEmails(Emails, SessionDate, SessionUrl, Note, CreatedByName);
+        await _commsHandler.SendCreateSessionEmails(message.NotificationEmails, SessionDate, SessionUrl, Note, CreatedByName);
     }
 
-    public bool ValidateCreateSessionMessage(ServiceBusCommsMessage message, out ICollection<string> Emails, out DateTime SessionDate, out string SessionUrl, out string Note, out string CreatedByName)
+    public bool ValidateCreateSessionMessage(ServiceBusCommsMessage message, out DateTime SessionDate, out string SessionUrl, out string Note, out string CreatedByName)
     {
         try
         {
-            Emails = message.NotificationEmails;
             SessionDate = DateTime.Parse(message.MessageData["SessionDate"]);
             Note = message.MessageData["Note"];
             CreatedByName = message.MessageData["CreatedByName"];
@@ -261,7 +258,6 @@ public class MessageProcessor : IMessageProcessor
         }
         catch
         {
-            Emails = Array.Empty<string>();
             SessionDate = DateTime.MinValue;
             Note = string.Empty;
             CreatedByName = string.Empty;

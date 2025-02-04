@@ -5,11 +5,11 @@ namespace HockeyPickup.Comms.Services;
 
 public interface ICommsHandler
 {
-    Task SendRegistrationConfirmationEmail(string Email, string UserId, string FirstName, string LastName, string ConfirmationUrl);
-    Task SendForgotPasswordEmail(string Email, string UserId, string FirstName, string LastName, string ResetUrl);
-    Task SendRawContentEmail(string Subject, string RawContent);
-    Task SendCreateSessionEmails(ICollection<string> notificationEmails, DateTime SessionDate, string SessionUrl, string Note, string CreatedByName);
-    Task SendTeamAssignmentChangeEmail(string Email, NotificationPreference NotificationPreference, ICollection<string> notificationEmails, DateTime SessionDate, string SessionUrl, string FirstName, string LastName, string FormerTeamAssignment, string NewTeamAssignment);
+    Task SendRegistrationConfirmationEmail(string email, string userId, string firstName, string lastName, string confirmationUrl);
+    Task SendForgotPasswordEmail(string email, string userId, string firstName, string lastName, string resetUrl);
+    Task SendRawContentEmail(string subject, string rawContent);
+    Task SendCreateSessionEmails(ICollection<string> notificationEmails, DateTime sessionDate, string sessionUrl, string note, string createdByName);
+    Task SendTeamAssignmentChangeEmail(string email, NotificationPreference notificationPreference, ICollection<string> notificationEmails, DateTime sessionDate, string sessionUrl, string firstName, string lastName, string formerTeamAssignment, string newTeamAssignment);
     Task SendBuyerSellerMatchedEmails(string buyerEmail, NotificationPreference buyerNotificationPreference, string sellerEmail, NotificationPreference sellerNotificationPreference, ICollection<string> notificationEmails, DateTime sessionDate, string sessionUrl, string buyerFirstName, string buyerLastName, string sellerFirstName, string sellerLastName);
     Task SendAddedToBuyQueueEmails(string buyerEmail, NotificationPreference buyerNotificationPreference, ICollection<string> notificationEmails, DateTime sessionDate, string sessionUrl, string buyerFirstName, string buyerLastName);
     Task SendAddedToSellQueueEmails(string sellerEmail, NotificationPreference sellerNotificationPreference, ICollection<string> notificationEmails, DateTime sessionDate, string sessionUrl, string sellerFirstName, string sellerLastName);
@@ -30,15 +30,15 @@ public class CommsHandler : ICommsHandler
         _emailService = emailService;
     }
 
-    public async Task SendRawContentEmail(string Subject, string RawContent)
+    public async Task SendRawContentEmail(string subject, string rawContent)
     {
         try
         {
             _logger.LogInformation($"CommsHandler->Sending Raw Content Email");
 
-            var alertEmail = Environment.GetEnvironmentVariable("SignInAlertEmail");
+            var alertEmail = Environment.GetEnvironmentVariable("SignInAlertEmail")!;
 
-            await _emailService.SendEmailAsync(alertEmail!, Subject, EmailTemplate.RawContent, new Dictionary<string, string> { { "RAWCONTENT", RawContent } });
+            await _emailService.SendEmailAsync(alertEmail, subject, EmailTemplate.RawContent, new Dictionary<string, string> { { "RAWCONTENT", rawContent } });
 
             _logger.LogInformation($"CommsHandler->Successfully sent Raw Content email");
         }
@@ -50,92 +50,92 @@ public class CommsHandler : ICommsHandler
         }
     }
 
-    public async Task SendForgotPasswordEmail(string Email, string UserId, string FirstName, string LastName, string ResetUrl)
+    public async Task SendForgotPasswordEmail(string email, string userId, string firstName, string lastName, string resetUrl)
     {
         try
         {
-            _logger.LogInformation($"CommsHandler->Sending Forgot Password email for: {Email}");
+            _logger.LogInformation($"CommsHandler->Sending Forgot Password email for: {email}");
 
-            await _emailService.SendEmailAsync(Email, "Reset Password Request", EmailTemplate.ForgotPassword,
-                new Dictionary<string, string> { { "EMAIL", Email }, { "FIRSTNAME", FirstName }, { "LASTNAME", LastName }, { "RESET_URL", ResetUrl } });
+            await _emailService.SendEmailAsync(email, "Reset Password Request", EmailTemplate.ForgotPassword,
+                new Dictionary<string, string> { { "EMAIL", email }, { "FIRSTNAME", firstName }, { "LASTNAME", lastName }, { "RESET_URL", resetUrl } });
 
-            _logger.LogInformation($"CommsHandler->Successfully sent Forgot Password email for: {Email}");
+            _logger.LogInformation($"CommsHandler->Successfully sent Forgot Password email for: {email}");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"CommsHandler->Error sending Forgot Password email for: {Email}");
+            _logger.LogError(ex, $"CommsHandler->Error sending Forgot Password email for: {email}");
 
             throw;
         }
     }
 
-    public async Task SendRegistrationConfirmationEmail(string Email, string UserId, string FirstName, string LastName, string ConfirmationUrl)
+    public async Task SendRegistrationConfirmationEmail(string email, string userId, string firstName, string lastName, string confirmationUrl)
     {
         try
         {
-            _logger.LogInformation($"CommsHandler->Sending Registration Confirmation email for: {Email}");
+            _logger.LogInformation($"CommsHandler->Sending Registration Confirmation email for: {email}");
 
-            await _emailService.SendEmailAsync(Email, "Registration Confirmation", EmailTemplate.Register,
-                new Dictionary<string, string> { { "EMAIL", Email }, { "FIRSTNAME", FirstName }, { "LASTNAME", LastName }, { "CONFIRMATION_URL", ConfirmationUrl } });
+            await _emailService.SendEmailAsync(email, "Registration Confirmation", EmailTemplate.Register,
+                new Dictionary<string, string> { { "EMAIL", email }, { "FIRSTNAME", firstName }, { "LASTNAME", lastName }, { "CONFIRMATION_URL", confirmationUrl } });
 
-            _logger.LogInformation($"CommsHandler->Successfully sent Registration Confirmation email for: {Email}");
+            _logger.LogInformation($"CommsHandler->Successfully sent Registration Confirmation email for: {email}");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"CommsHandler->Error sending Registration Confirmation email for: {Email}");
+            _logger.LogError(ex, $"CommsHandler->Error sending Registration Confirmation email for: {email}");
 
             throw;
         }
     }
 
-    public async Task SendCreateSessionEmails(ICollection<string> notificationEmails, DateTime SessionDate, string SessionUrl, string Note, string CreatedByName)
+    public async Task SendCreateSessionEmails(ICollection<string> notificationEmails, DateTime sessionDate, string sessionUrl, string note, string createdByName)
     {
         try
         {
-            _logger.LogInformation($"CommsHandler->Sending Create Session email for: {SessionDate}");
+            _logger.LogInformation($"CommsHandler->Sending Create Session email for: {sessionDate}");
 
             foreach (var e in notificationEmails)
             {
-                await _emailService.SendEmailAsync(e, $"Session {SessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")} Created", EmailTemplate.CreateSession,
-                    new Dictionary<string, string> { { "EMAIL", e }, { "SESSIONDATE", SessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") }, { "SESSION_URL", SessionUrl }, { "NOTE", Note }, { "CREATEDBYNAME", CreatedByName } });
+                await _emailService.SendEmailAsync(e, $"Session {sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")} Created", EmailTemplate.CreateSessionNotification,
+                    new Dictionary<string, string> { { "EMAIL", e }, { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") }, { "SESSION_URL", sessionUrl }, { "NOTE", note }, { "CREATEDBYNAME", createdByName } });
             }
 
-            _logger.LogInformation($"CommsHandler->Successfully sent {notificationEmails.Count()} Create Session emails for: {SessionDate}");
+            _logger.LogInformation($"CommsHandler->Successfully sent {notificationEmails.Count()} Create Session emails for: {sessionDate}");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"CommsHandler->Error sending {notificationEmails.Count()} Create Session emails for: {SessionDate}");
+            _logger.LogError(ex, $"CommsHandler->Error sending {notificationEmails.Count()} Create Session emails for: {sessionDate}");
 
             throw;
         }
     }
 
-    public async Task SendTeamAssignmentChangeEmail(string Email, NotificationPreference NotificationPreference, ICollection<string> notificationEmails, DateTime SessionDate, string SessionUrl, string FirstName, string LastName, string FormerTeamAssignment, string NewTeamAssignment)
+    public async Task SendTeamAssignmentChangeEmail(string email, NotificationPreference notificationPreference, ICollection<string> notificationEmails, DateTime sessionDate, string sessionUrl, string firstName, string lastName, string formerTeamAssignment, string newTeamAssignment)
     {
         try
         {
-            if (NotificationPreference != NotificationPreference.None)
+            if (notificationPreference != NotificationPreference.None)
             {
-                _logger.LogInformation($"CommsHandler->Sending Team Assignment Change email for: {Email}");
+                _logger.LogInformation($"CommsHandler->Sending Team Assignment Change email for: {email}");
 
-                await _emailService.SendEmailAsync(Email, $"Team Assignment Change for Session {SessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")}", EmailTemplate.TeamAssignmentChange,
-                    new Dictionary<string, string> { { "EMAIL", Email }, { "SESSIONDATE", SessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") }, { "SESSION_URL", SessionUrl }, { "FIRSTNAME", FirstName }, { "LASTNAME", LastName }, { "FORMERTEAMASSIGNMENT", FormerTeamAssignment }, { "NEWTEAMASSIGNMENT", NewTeamAssignment } });
+                await _emailService.SendEmailAsync(email, $"Team Assignment Change for Session {sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")}", EmailTemplate.TeamAssignmentChange,
+                    new Dictionary<string, string> { { "EMAIL", email }, { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") }, { "SESSION_URL", sessionUrl }, { "FIRSTNAME", firstName }, { "LASTNAME", lastName }, { "FORMERTEAMASSIGNMENT", formerTeamAssignment }, { "NEWTEAMASSIGNMENT", newTeamAssignment } });
 
-                _logger.LogInformation($"CommsHandler->Successfully sent Team Assignment Change email for: {Email}");
+                _logger.LogInformation($"CommsHandler->Successfully sent Team Assignment Change email for: {email}");
             }
 
             // Now send to all those that have notification 'All' set
             foreach (var e in notificationEmails)
             {
-                await _emailService.SendEmailAsync(e, $"Alert: Team Assignment Change for Session {SessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")}", EmailTemplate.TeamAssignmentChangeNotification,
-                    new Dictionary<string, string> { { "EMAIL", e }, { "SESSIONDATE", SessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") }, { "SESSION_URL", SessionUrl }, { "FIRSTNAME", FirstName }, { "LASTNAME", LastName }, { "FORMERTEAMASSIGNMENT", FormerTeamAssignment }, { "NEWTEAMASSIGNMENT", NewTeamAssignment } });
+                await _emailService.SendEmailAsync(e, $"Alert: Team Assignment Change for Session {sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")}", EmailTemplate.TeamAssignmentChangeNotification,
+                    new Dictionary<string, string> { { "EMAIL", e }, { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") }, { "SESSION_URL", sessionUrl }, { "FIRSTNAME", firstName }, { "LASTNAME", lastName }, { "FORMERTEAMASSIGNMENT", formerTeamAssignment }, { "NEWTEAMASSIGNMENT", newTeamAssignment } });
             }
 
-            _logger.LogInformation($"CommsHandler->Successfully sent {notificationEmails.Count()} Team Assignment Change emails for: {SessionDate}");
+            _logger.LogInformation($"CommsHandler->Successfully sent {notificationEmails.Count()} Team Assignment Change emails for: {sessionDate}");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"CommsHandler->Error sending Team Assignment Change email for: {Email}");
+            _logger.LogError(ex, $"CommsHandler->Error sending Team Assignment Change email for: {email}");
 
             throw;
         }

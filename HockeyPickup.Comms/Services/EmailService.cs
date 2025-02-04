@@ -16,7 +16,7 @@ public enum EmailTemplate
     Register,
     ForgotPassword,
     RawContent,
-    CreateSession,
+    CreateSessionNotification,
     TeamAssignmentChange,
     TeamAssignmentChangeNotification,
     BoughtSpotBuyer,
@@ -42,7 +42,7 @@ public class EmailService : IEmailService
     private readonly ILogger<EmailService> _logger;
     private readonly Dictionary<EmailTemplate, (string File, HashSet<string> RequiredTokens)> _templateConfig;
     private readonly bool isLocalhost;
-    private readonly string? alertEmail;
+    private readonly string alertEmail;
 
     public EmailService(ILogger<EmailService> logger)
     {
@@ -66,8 +66,8 @@ public class EmailService : IEmailService
                 ("forgot_password.txt", new HashSet<string> { "EMAIL", "FIRSTNAME", "RESET_URL" })
             },
             {
-                EmailTemplate.CreateSession,
-                ("create_session.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "SESSION_URL", "NOTE", "CREATEDBYNAME" })
+                EmailTemplate.CreateSessionNotification,
+                ("create_session_notification.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "SESSION_URL", "NOTE", "CREATEDBYNAME" })
             },
             {
                 EmailTemplate.TeamAssignmentChange,
@@ -143,7 +143,7 @@ public class EmailService : IEmailService
         {
             isLocalhost = true;
         }
-        alertEmail = Environment.GetEnvironmentVariable("SignInAlertEmail");
+        alertEmail = Environment.GetEnvironmentVariable("SignInAlertEmail")!;
     }
 
     public async Task SendEmailAsync(string to, string subject, EmailTemplate template, Dictionary<string, string> tokens)
@@ -179,7 +179,7 @@ public class EmailService : IEmailService
             message.SetFrom(new EmailAddress(Environment.GetEnvironmentVariable("SendGridFromAddress")));
 
             // When running locally, override the 'to'. NEVER send an email to a real user
-            if (isLocalhost && !string.IsNullOrEmpty(alertEmail))
+            if (isLocalhost)
             {
                 to = alertEmail;
             }

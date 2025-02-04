@@ -19,7 +19,7 @@
     <EmbeddedResource Include="email_templates\added_to_roster.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="email_templates\bought_spot_from_buyer_seller.txt">
+    <EmbeddedResource Include="email_templates\bought_spot_seller.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="email_templates\bought_spot_notification.txt">
@@ -49,7 +49,7 @@
     <EmbeddedResource Include="email_templates\cancelled_sell_queue_notification.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="email_templates\bought_spot_from_buyer.txt">
+    <EmbeddedResource Include="email_templates\bought_spot_buyer.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="email_templates\team_assignment_change_notification.txt">
@@ -67,7 +67,7 @@
     <EmbeddedResource Include="email_templates\raw_content.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="email_templates\create_session.txt">
+    <EmbeddedResource Include="email_templates\create_session_notification.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="email_templates\signed_in.txt">

@@ -19,6 +19,8 @@ The main technology stack platform is [.NET Core](https://dotnet.microsoft.com/)
 
 Create a new file at the root of the HockeyPickup.Comms project named `local.settings.json`.
 
+[Telegram](https://telegram.org/) bot messages are optional. Get a Telegram Bot key using [BotFather](https://telegram.me/BotFather).
+
 Get the `ServiceBusConnectionString` from Azure portal. Currently Service Bus is not available to run locally.
 
 Get the `SendGridApiKey` from [SendGrid](https://sendgrid.com/en-us/solutions/email-api-v2).
@@ -29,11 +31,14 @@ Get the `SendGridApiKey` from [SendGrid](https://sendgrid.com/en-us/solutions/em
   "Values": {
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "TelegramBotKey": "<TelegramBotKey>",
+    "TelegramRuntimeChannel": "HockeyApi_Runtime_Dev",
     "ServiceBusConnectionString": "<ServiceBusConnectionString>",
     "ServiceBusCommsQueueName": "comms-dev",
     "SendGridApiKey": "<SendGridApiKey>",
     "SendGridFromAddress": "pickup@hockeypickup.com",
-    "SignInAlertEmail":  "pickup@hockeypickup.com"
+    "SignInAlertEmail":  "pickup@hockeypickup.com",
+    "BaseApiUrl": "https://localhost:7042/api"
   }
 }
 ```

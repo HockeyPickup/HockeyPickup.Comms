@@ -178,6 +178,7 @@ public class EmailService : IEmailService
             if (_isDev)
             {
                 to = alertEmail;
+                subject = $"{subject} (DEV ENVIRONMENT)";
             }
             message.AddTo(to);
             message.SetSubject(subject);

@@ -42,17 +42,28 @@ public class MessageProcessor : IMessageProcessor
     private readonly ICommsHandler _commsHandler;
     private readonly ILogger<MessageProcessor> _logger;
     private readonly TelegramBot _telegramBot;
+    private readonly bool _isDev;
+    private readonly string _alertEmail;
 
     public MessageProcessor(ICommsHandler commsHandler, ILogger<MessageProcessor> logger, TelegramBot telegramBot)
     {
         _commsHandler = commsHandler;
         _logger = logger;
         _telegramBot = telegramBot;
+        _isDev = Environment.GetEnvironmentVariable("ServiceBusCommsQueueName")!.Contains("-dev");
+        _alertEmail = Environment.GetEnvironmentVariable("SignInAlertEmail")!;
     }
 
     public async Task ProcessMessageAsync(ServiceBusCommsMessage message)
     {
         _logger.LogInformation($"MessageProcessor->Processing message for communication event: {message.Metadata["CommunicationEventId"]}");
+
+        // If this is a dev message queue, don't attempt to notify users of message. Clear that and just add one record.
+        if (_isDev && message.NotificationEmails != null && message.NotificationEmails.Count > 1)
+        {
+            message.NotificationEmails.Clear();
+            message.NotificationEmails.Add(_alertEmail);
+        }
 
         switch (message.Metadata["Type"])
         {

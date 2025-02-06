@@ -41,11 +41,12 @@ public class EmailService : IEmailService
 {
     private readonly ILogger<EmailService> _logger;
     private readonly Dictionary<EmailTemplate, (string File, HashSet<string> RequiredTokens)> _templateConfig;
-    private readonly bool isLocalhost;
     private readonly string alertEmail;
+    private readonly bool _isDev;
 
     public EmailService(ILogger<EmailService> logger)
     {
+        _isDev = Environment.GetEnvironmentVariable("ServiceBusCommsQueueName")!.Contains("-dev");
         _logger = logger;
         _templateConfig = new Dictionary<EmailTemplate, (string, HashSet<string>)>
         {
@@ -138,11 +139,6 @@ public class EmailService : IEmailService
                 ("deleted_from_roster_notification.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "FIRSTNAME", "LASTNAME", "SESSIONURL" })
             },
         };
-        var baseApiUrl = Environment.GetEnvironmentVariable("BaseApiUrl");
-        if (baseApiUrl!.Contains("localhost"))
-        {
-            isLocalhost = true;
-        }
         alertEmail = Environment.GetEnvironmentVariable("SignInAlertEmail")!;
     }
 
@@ -178,8 +174,8 @@ public class EmailService : IEmailService
             var message = new SendGridMessage();
             message.SetFrom(new EmailAddress(Environment.GetEnvironmentVariable("SendGridFromAddress")));
 
-            // When running locally, override the 'to'. NEVER send an email to a real user
-            if (isLocalhost)
+            // When dev queue, override the 'to'. NEVER send an email to a real user
+            if (_isDev)
             {
                 to = alertEmail;
             }

@@ -9,6 +9,7 @@ public interface IMessageProcessor
 {
     Task ProcessMessageAsync(ServiceBusCommsMessage message);
     Task ProcessAddedPaymentMethod(ServiceBusCommsMessage message);
+    Task ProcessSaveUser(ServiceBusCommsMessage message);
     Task ProcessForgotPassword(ServiceBusCommsMessage message);
     Task ProcessPhotoUploaded(ServiceBusCommsMessage message);
     Task ProcessRegisterConfirmation(ServiceBusCommsMessage message);
@@ -25,6 +26,7 @@ public interface IMessageProcessor
     Task ProcessCancelledSellQueue(ServiceBusCommsMessage message);
 
     bool ValidateAddedPaymentMethod(ServiceBusCommsMessage message, out string email, out NotificationPreference notificationPreference, out string firstName, out string lastName, out string paymentMethodType);
+    bool ValidateSaveUser(ServiceBusCommsMessage message, out string email, out NotificationPreference notificationPreference, out string firstName, out string lastName);
     bool ValidatePhotoUploaded(ServiceBusCommsMessage message, out string email, out NotificationPreference notificationPreference, out string firstName, out string lastName);
     bool ValidateSignedInMessage(ServiceBusCommsMessage message, out string email, out NotificationPreference notificationPreference, out string firstName, out string lastName);
     bool ValidateRegisterConfirmationMessage(ServiceBusCommsMessage message, out string email, out NotificationPreference notificationPreference, out string userId, out string firstName, out string lastName, out string confirmationUrl);
@@ -70,6 +72,10 @@ public class MessageProcessor : IMessageProcessor
             // User messages
             case "AddedPaymentMethod":
                 await ProcessAddedPaymentMethod(message);
+                break;
+
+            case "SaveUser":
+                await ProcessSaveUser(message);
                 break;
 
             case "ForgotPassword":
@@ -194,6 +200,16 @@ public class MessageProcessor : IMessageProcessor
         await _telegramBot.SendChannelMessageAsync($"{FirstName} {LastName} Added Payment Method Type {PaymentMethodType}");
     }
 
+    public async Task ProcessSaveUser(ServiceBusCommsMessage message)
+    {
+        if (!ValidateSaveUser(message, out var Email, out var NotificationPreference, out var FirstName, out var LastName))
+        {
+            throw new ArgumentException("Required data missing for SaveUser message");
+        }
+
+        await _telegramBot.SendChannelMessageAsync($"{FirstName} {LastName} Saved User Preferences");
+    }
+
     public bool ValidateAddedPaymentMethod(ServiceBusCommsMessage message, out string Email, out NotificationPreference NotificationPreference, out string FirstName, out string LastName, out string PaymentMethodType)
     {
         try
@@ -211,6 +227,27 @@ public class MessageProcessor : IMessageProcessor
             FirstName = string.Empty;
             LastName = string.Empty;
             PaymentMethodType = string.Empty;
+            return false;
+        }
+
+        return true;
+    }
+
+    public bool ValidateSaveUser(ServiceBusCommsMessage message, out string Email, out NotificationPreference NotificationPreference, out string FirstName, out string LastName)
+    {
+        try
+        {
+            Email = message.CommunicationMethod["Email"];
+            NotificationPreference = Enum.Parse<NotificationPreference>(message.CommunicationMethod["NotificationPreference"]);
+            FirstName = message.RelatedEntities["FirstName"];
+            LastName = message.RelatedEntities["LastName"];
+        }
+        catch
+        {
+            Email = string.Empty;
+            NotificationPreference = NotificationPreference.None;
+            FirstName = string.Empty;
+            LastName = string.Empty;
             return false;
         }
 

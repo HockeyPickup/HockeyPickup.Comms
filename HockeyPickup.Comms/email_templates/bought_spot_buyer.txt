@@ -2,7 +2,7 @@
     <div style="background: #ffffff; padding: 10px; border-radius: 5px;">
         <h1 style="color: #2C5282; margin-bottom: 10px; font-size: 24px;">Congratulations! You bought a spot for {{SESSIONDATE}}.</h1>
 
-        <p style="margin-bottom: 10px; line-height: 1.5;">You successfully bought a spot from {{SELLERFIRSTNAME}} {{SELLERLASTNAME}}. Please make the payment as soon as possible to confirm your spot.</p>
+        <p style="margin-bottom: 10px; line-height: 1.5;">{{BUYERFIRSTNAME}}, You successfully bought a spot from {{SELLERFIRSTNAME}} {{SELLERLASTNAME}}. Team Assignment: {{TEAMASSIGNMENT}}. Please make the payment as soon as possible to confirm your spot.</p>
 
         <div style="text-align: center; margin: 30px 0;">
             <a href="{{SESSIONURL}}" style="background-color: #2C5282; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">View Session Details</a>
@@ -14,6 +14,7 @@
                 <li>Pay {{SELLERFIRSTNAME}}</li>
                 <li>Mark payment as sent in the system once you've paid</li>
                 <li>Get ready to play!</li>
+                <li>NOTE: Your team assignment may change. Be sure and check the current roster</li>
             </ol>
         </div>
     </div>

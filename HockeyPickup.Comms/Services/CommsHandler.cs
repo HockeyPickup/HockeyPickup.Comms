@@ -10,7 +10,7 @@ public interface ICommsHandler
     Task SendRawContentEmail(string subject, string rawContent);
     Task SendCreateSessionEmails(ICollection<string> notificationEmails, DateTime sessionDate, string sessionUrl, string note, string createdByName);
     Task SendTeamAssignmentChangeEmail(string email, NotificationPreference notificationPreference, ICollection<string> notificationEmails, DateTime sessionDate, string sessionUrl, string firstName, string lastName, string formerTeamAssignment, string newTeamAssignment);
-    Task SendBuyerSellerMatchedEmails(string buyerEmail, NotificationPreference buyerNotificationPreference, string sellerEmail, NotificationPreference sellerNotificationPreference, ICollection<string> notificationEmails, DateTime sessionDate, string sessionUrl, string buyerFirstName, string buyerLastName, string sellerFirstName, string sellerLastName);
+    Task SendBuyerSellerMatchedEmails(string buyerEmail, NotificationPreference buyerNotificationPreference, string sellerEmail, NotificationPreference sellerNotificationPreference, ICollection<string> notificationEmails, DateTime sessionDate, string sessionUrl, string buyerFirstName, string buyerLastName, string sellerFirstName, string sellerLastName, string teamAssignment);
     Task SendAddedToBuyQueueEmails(string buyerEmail, NotificationPreference buyerNotificationPreference, ICollection<string> notificationEmails, DateTime sessionDate, string sessionUrl, string buyerFirstName, string buyerLastName);
     Task SendAddedToSellQueueEmails(string sellerEmail, NotificationPreference sellerNotificationPreference, ICollection<string> notificationEmails, DateTime sessionDate, string sessionUrl, string sellerFirstName, string sellerLastName);
     Task SendCancelledBuyQueueEmails(string buyerEmail, NotificationPreference buyerNotificationPreference, ICollection<string> notificationEmails, DateTime sessionDate, string sessionUrl, string buyerFirstName, string buyerLastName);
@@ -144,7 +144,7 @@ public class CommsHandler : ICommsHandler
     public async Task SendBuyerSellerMatchedEmails(string buyerEmail, NotificationPreference buyerNotificationPreference,
         string sellerEmail, NotificationPreference sellerNotificationPreference,
         ICollection<string> notificationEmails, DateTime sessionDate, string sessionUrl,
-        string buyerFirstName, string buyerLastName, string sellerFirstName, string sellerLastName)
+        string buyerFirstName, string buyerLastName, string sellerFirstName, string sellerLastName, string teamAssignment)
     {
         try
         {
@@ -157,11 +157,14 @@ public class CommsHandler : ICommsHandler
                     EmailTemplate.BoughtSpotBuyer,
                     new Dictionary<string, string>
                     {
-                    { "EMAIL", buyerEmail },
-                    { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
-                    { "SELLERFIRSTNAME", sellerFirstName },
-                    { "SELLERLASTNAME", sellerLastName },
-                    { "SESSIONURL", sessionUrl }
+                        { "EMAIL", buyerEmail },
+                        { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
+                        { "BUYERFIRSTNAME", buyerFirstName },
+                        { "BUYERLASTNAME", buyerLastName },
+                        { "SELLERFIRSTNAME", sellerFirstName },
+                        { "SELLERLASTNAME", sellerLastName },
+                        { "SESSIONURL", sessionUrl },
+                        { "TEAMASSIGNMENT", teamAssignment }
                     }
                 );
             }
@@ -175,11 +178,14 @@ public class CommsHandler : ICommsHandler
                     EmailTemplate.BoughtSpotSeller,
                     new Dictionary<string, string>
                     {
-                    { "EMAIL", buyerEmail },
-                    { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
-                    { "BUERFIRSTNAME", sellerFirstName },
-                    { "BUYERLASTNAME", sellerLastName },
-                    { "SESSIONURL", sessionUrl }
+                        { "EMAIL", sellerEmail },
+                        { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
+                        { "BUYERFIRSTNAME", buyerFirstName },
+                        { "BUYERLASTNAME", buyerLastName },
+                        { "SELLERFIRSTNAME", sellerFirstName },
+                        { "SELLERLASTNAME", sellerLastName },
+                        { "SESSIONURL", sessionUrl },
+                        { "TEAMASSIGNMENT", teamAssignment }
                     }
                 );
             }
@@ -193,13 +199,14 @@ public class CommsHandler : ICommsHandler
                     EmailTemplate.BoughtSpotNotification,
                     new Dictionary<string, string>
                     {
-                    { "EMAIL", e },
-                    { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
-                    { "BUYERFIRSTNAME", buyerFirstName },
-                    { "BUYERLASTNAME", buyerLastName },
-                    { "SELLERFIRSTNAME", sellerFirstName },
-                    { "SELLERLASTNAME", sellerLastName },
-                    { "SESSIONURL", sessionUrl }
+                        { "EMAIL", e },
+                        { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
+                        { "BUYERFIRSTNAME", buyerFirstName },
+                        { "BUYERLASTNAME", buyerLastName },
+                        { "SELLERFIRSTNAME", sellerFirstName },
+                        { "SELLERLASTNAME", sellerLastName },
+                        { "SESSIONURL", sessionUrl },
+                        { "TEAMASSIGNMENT", teamAssignment }
                     }
                 );
             }
@@ -226,9 +233,11 @@ public class CommsHandler : ICommsHandler
                     EmailTemplate.AddedToBuyQueue,
                     new Dictionary<string, string>
                     {
-                    { "EMAIL", buyerEmail },
-                    { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
-                    { "SESSIONURL", sessionUrl }
+                        { "EMAIL", buyerEmail },
+                        { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
+                        { "BUYERFIRSTNAME", buyerFirstName },
+                        { "BUYERLASTNAME", buyerLastName },
+                        { "SESSIONURL", sessionUrl }
                     }
                 );
             }
@@ -242,11 +251,11 @@ public class CommsHandler : ICommsHandler
                     EmailTemplate.AddedToBuyQueueNotification,
                     new Dictionary<string, string>
                     {
-                    { "EMAIL", e },
-                    { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
-                    { "BUYERFIRSTNAME", buyerFirstName },
-                    { "BUYERLASTNAME", buyerLastName },
-                    { "SESSIONURL", sessionUrl }
+                        { "EMAIL", e },
+                        { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
+                        { "BUYERFIRSTNAME", buyerFirstName },
+                        { "BUYERLASTNAME", buyerLastName },
+                        { "SESSIONURL", sessionUrl }
                     }
                 );
             }
@@ -273,9 +282,11 @@ public class CommsHandler : ICommsHandler
                     EmailTemplate.AddedToSellQueue,
                     new Dictionary<string, string>
                     {
-                    { "EMAIL", sellerEmail },
-                    { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
-                    { "SESSIONURL", sessionUrl }
+                        { "EMAIL", sellerEmail },
+                        { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
+                        { "SELLERFIRSTNAME", sellerFirstName },
+                        { "SELLERLASTNAME", sellerLastName },
+                        { "SESSIONURL", sessionUrl }
                     }
                 );
             }
@@ -289,11 +300,11 @@ public class CommsHandler : ICommsHandler
                     EmailTemplate.AddedToSellQueueNotification,
                     new Dictionary<string, string>
                     {
-                    { "EMAIL", e },
-                    { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
-                    { "SELLERFIRSTNAME", sellerFirstName },
-                    { "SELLERLASTNAME", sellerLastName },
-                    { "SESSIONURL", sessionUrl }
+                        { "EMAIL", e },
+                        { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
+                        { "SELLERFIRSTNAME", sellerFirstName },
+                        { "SELLERLASTNAME", sellerLastName },
+                        { "SESSIONURL", sessionUrl }
                     }
                 );
             }
@@ -320,9 +331,9 @@ public class CommsHandler : ICommsHandler
                     EmailTemplate.CancelledBuyQueue,
                     new Dictionary<string, string>
                     {
-                    { "EMAIL", buyerEmail },
-                    { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
-                    { "SESSIONURL", sessionUrl }
+                        { "EMAIL", buyerEmail },
+                        { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
+                        { "SESSIONURL", sessionUrl }
                     }
                 );
             }
@@ -336,11 +347,11 @@ public class CommsHandler : ICommsHandler
                     EmailTemplate.CancelledBuyQueueNotification,
                     new Dictionary<string, string>
                     {
-                    { "EMAIL", e },
-                    { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
-                    { "BUYERFIRSTNAME", buyerFirstName },
-                    { "BUYERLASTNAME", buyerLastName },
-                    { "SESSIONURL", sessionUrl }
+                        { "EMAIL", e },
+                        { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
+                        { "BUYERFIRSTNAME", buyerFirstName },
+                        { "BUYERLASTNAME", buyerLastName },
+                        { "SESSIONURL", sessionUrl }
                     }
                 );
             }
@@ -367,9 +378,9 @@ public class CommsHandler : ICommsHandler
                     EmailTemplate.CancelledSellQueue,
                     new Dictionary<string, string>
                     {
-                    { "EMAIL", sellerEmail },
-                    { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
-                    { "SESSIONURL", sessionUrl }
+                        { "EMAIL", sellerEmail },
+                        { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
+                        { "SESSIONURL", sessionUrl }
                     }
                 );
             }
@@ -383,11 +394,11 @@ public class CommsHandler : ICommsHandler
                     EmailTemplate.CancelledSellQueueNotification,
                     new Dictionary<string, string>
                     {
-                    { "EMAIL", e },
-                    { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
-                    { "SELLERFIRSTNAME", sellerFirstName },
-                    { "SELLERLASTNAME", sellerLastName },
-                    { "SESSIONURL", sessionUrl }
+                        { "EMAIL", e },
+                        { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
+                        { "SELLERFIRSTNAME", sellerFirstName },
+                        { "SELLERLASTNAME", sellerLastName },
+                        { "SESSIONURL", sessionUrl }
                     }
                 );
             }
@@ -414,9 +425,9 @@ public class CommsHandler : ICommsHandler
                     EmailTemplate.AddedToRoster,
                     new Dictionary<string, string>
                     {
-                    { "EMAIL", email },
-                    { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
-                    { "SESSIONURL", sessionUrl }
+                        { "EMAIL", email },
+                        { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
+                        { "SESSIONURL", sessionUrl }
                     }
                 );
             }
@@ -430,11 +441,11 @@ public class CommsHandler : ICommsHandler
                     EmailTemplate.AddedToRosterNotification,
                     new Dictionary<string, string>
                     {
-                    { "EMAIL", e },
-                    { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
-                    { "FIRSTNAME", firstName },
-                    { "LASTNAME", lastName },
-                    { "SESSIONURL", sessionUrl }
+                        { "EMAIL", e },
+                        { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
+                        { "FIRSTNAME", firstName },
+                        { "LASTNAME", lastName },
+                        { "SESSIONURL", sessionUrl }
                     }
                 );
             }
@@ -461,9 +472,9 @@ public class CommsHandler : ICommsHandler
                     EmailTemplate.DeletedFromRoster,
                     new Dictionary<string, string>
                     {
-                    { "EMAIL", email },
-                    { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
-                    { "SESSIONURL", sessionUrl }
+                        { "EMAIL", email },
+                        { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
+                        { "SESSIONURL", sessionUrl }
                     }
                 );
             }
@@ -477,11 +488,11 @@ public class CommsHandler : ICommsHandler
                     EmailTemplate.DeletedFromRosterNotification,
                     new Dictionary<string, string>
                     {
-                    { "EMAIL", e },
-                    { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
-                    { "FIRSTNAME", firstName },
-                    { "LASTNAME", lastName },
-                    { "SESSIONURL", sessionUrl }
+                        { "EMAIL", e },
+                        { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
+                        { "FIRSTNAME", firstName },
+                        { "LASTNAME", lastName },
+                        { "SESSIONURL", sessionUrl }
                     }
                 );
             }

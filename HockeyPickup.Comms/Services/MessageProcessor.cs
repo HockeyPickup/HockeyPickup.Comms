@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using HockeyPickup.Api;
 using HockeyPickup.Comms.Services;
 using Newtonsoft.Json;
+using Telegram.Bot.Types;
 
 public interface IMessageProcessor
 {
@@ -24,6 +25,7 @@ public interface IMessageProcessor
     Task ProcessSoldSpotToBuyer(ServiceBusCommsMessage message);
     Task ProcessCancelledBuyQueue(ServiceBusCommsMessage message);
     Task ProcessCancelledSellQueue(ServiceBusCommsMessage message);
+    Task ProcessPlayingStatusChange(ServiceBusCommsMessage message);
 
     bool ValidateAddedPaymentMethod(ServiceBusCommsMessage message, out string email, out NotificationPreference notificationPreference, out string firstName, out string lastName, out string paymentMethodType);
     bool ValidateSaveUser(ServiceBusCommsMessage message, out string email, out NotificationPreference notificationPreference, out string firstName, out string lastName);
@@ -37,6 +39,7 @@ public interface IMessageProcessor
     bool ValidateBuyerMessage(ServiceBusCommsMessage message, out string buyerEmail, out NotificationPreference buyerNotificationPreference, out string buyerFirstName, out string buyerLastName, out string teamAssignment);
     bool ValidateSellerMessage(ServiceBusCommsMessage message, out string sellerEmail, out NotificationPreference sellerNotificationPreference, out string sellerFirstName, out string sellerLastName, out string teamAssignment);
     bool ValidateBuySellMessage(ServiceBusCommsMessage message, out string buyerEmail, out NotificationPreference buyerNotificationPreference, out string sellerEmail, out NotificationPreference sellerNotificationPreference, out string buyerFirstName, out string buyerLastName, out string sellerFirstName, out string sellerLastName, out string teamAssignment);
+    bool ValidateProcessPlayingStatusChange(ServiceBusCommsMessage message, out string email, out NotificationPreference notificationPreference, out string firstName, out string lastName, out DateTime sessionDate, out string sessionUrl, out bool previousPlayingStatus, out bool updatedPlayingStatus, out string note);
 }
 
 public class MessageProcessor : IMessageProcessor
@@ -134,6 +137,10 @@ public class MessageProcessor : IMessageProcessor
                 await ProcessCancelledSellQueue(message);
                 break;
 
+            case "PlayingStatusChange":
+                await ProcessPlayingStatusChange(message);
+                break;
+
             default:
                 await ProcessGenericMessage(message);
                 break;
@@ -147,6 +154,57 @@ public class MessageProcessor : IMessageProcessor
             $"MessageData:\r\n{JsonConvert.SerializeObject(message.MessageData, Formatting.Indented)}\r\n" +
             $"RelatedEntities:\r\n{JsonConvert.SerializeObject(message.RelatedEntities, Formatting.Indented)}"
         );
+    }
+
+    public async Task ProcessPlayingStatusChange(ServiceBusCommsMessage message)
+    {
+        if (!ValidateProcessPlayingStatusChange(message, out var email, out var notificationPreference, out var firstName, out var lastName, out var sessionDate, out var sessionUrl, out var previousPlayingStatus, out var updatedPlayingStatus, out var note))
+        {
+            throw new ArgumentException("Required data missing for ProcessPlayingStatusChange message");
+        }
+
+        var msg = $"Session: {sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")}. {firstName} {lastName} - Playing Status Changed from {(previousPlayingStatus ? "playing" : "not playing")} to {(updatedPlayingStatus ? "playing" : "not playing")}.";
+        if (!string.IsNullOrEmpty(note))
+        {
+            msg += $" - {note}";
+        }
+
+        await _telegramBot.SendChannelMessageAsync(msg);
+
+        await _commsHandler.SendProcessPlayingStatusChangeEmail(email, notificationPreference, message.NotificationEmails, sessionDate, sessionUrl, firstName, lastName, previousPlayingStatus ? "playing" : "not playing", updatedPlayingStatus ? "playing" : "not playing");
+    }
+
+    public bool ValidateProcessPlayingStatusChange(ServiceBusCommsMessage message, out string email, out NotificationPreference notificationPreference, out string firstName, out string lastName, out DateTime sessionDate, out string sessionUrl, out bool previousPlayingStatus, out bool updatedPlayingStatus, out string note)
+    {
+        try
+        {
+            email = message.CommunicationMethod["Email"];
+            notificationPreference = Enum.Parse<NotificationPreference>(message.CommunicationMethod["NotificationPreference"]);
+            firstName = message.RelatedEntities["FirstName"];
+            lastName = message.RelatedEntities["LastName"];
+            sessionDate = DateTime.Parse(message.MessageData["SessionDate"]);
+            sessionUrl = message.MessageData["SessionUrl"];
+            previousPlayingStatus = bool.Parse(message.MessageData["PreviousPlayingStatus"]);
+            updatedPlayingStatus = bool.Parse(message.MessageData["UpdatedPlayingStatus"]);
+            note = message.MessageData["Note"];
+        }
+        catch
+        {
+            email = string.Empty;
+            notificationPreference = NotificationPreference.None;
+            firstName = string.Empty;
+            lastName = string.Empty;
+            sessionDate = DateTime.MinValue;
+            sessionUrl = string.Empty;
+            previousPlayingStatus = false;
+            updatedPlayingStatus = false;
+            note = string.Empty;
+
+            return false;
+        }
+
+        return true;
+
     }
 
     public async Task ProcessTeamAssignmentChange(ServiceBusCommsMessage message)

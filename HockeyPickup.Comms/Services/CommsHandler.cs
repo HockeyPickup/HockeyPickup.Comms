@@ -17,6 +17,7 @@ public interface ICommsHandler
     Task SendCancelledSellQueueEmails(string sellerEmail, NotificationPreference sellerNotificationPreference, ICollection<string> notificationEmails, DateTime sessionDate, string sessionUrl, string sellerFirstName, string sellerLastName);
     Task SendAddedToRosterEmails(string email, NotificationPreference notificationPreference, ICollection<string> notificationEmails, DateTime sessionDate, string sessionUrl, string firstName, string lastName);
     Task SendDeletedFromRosterEmails(string email, NotificationPreference notificationPreference, ICollection<string> notificationEmails, DateTime sessionDate, string sessionUrl, string firstName, string lastName);
+    Task SendProcessPlayingStatusChangeEmail(string email, NotificationPreference notificationPreference, ICollection<string> notificationEmails, DateTime sessionDate, string sessionUrl, string firstName, string lastName, string previousPlayingStatusString, string updatedPlayingStatusString);
 }
 
 public class CommsHandler : ICommsHandler
@@ -136,6 +137,37 @@ public class CommsHandler : ICommsHandler
         catch (Exception ex)
         {
             _logger.LogError(ex, $"CommsHandler->Error sending Team Assignment Change email for: {email}");
+
+            throw;
+        }
+    }
+
+    public async Task SendProcessPlayingStatusChangeEmail(string email, NotificationPreference notificationPreference, ICollection<string> notificationEmails, DateTime sessionDate, string sessionUrl, string firstName, string lastName, string previousPlayingStatusString, string updatedPlayingStatusString)
+    {
+        try
+        {
+            if (notificationPreference != NotificationPreference.None)
+            {
+                _logger.LogInformation($"CommsHandler->Sending Playing Status Change email for: {email}");
+
+                await _emailService.SendEmailAsync(email, $"Playing Status Change for Session {sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")}", EmailTemplate.PlayingStatusChange,
+                    new Dictionary<string, string> { { "EMAIL", email }, { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") }, { "SESSION_URL", sessionUrl }, { "FIRSTNAME", firstName }, { "LASTNAME", lastName }, { "PREVIOUSPLAYINGSTATUSSTRING", previousPlayingStatusString }, { "UPDATEDPLAYINGSTATUSSTRING", updatedPlayingStatusString } });
+
+                _logger.LogInformation($"CommsHandler->Successfully sent Playing Status Change email for: {email}");
+            }
+
+            // Now send to all those that have notification 'All' set
+            foreach (var e in notificationEmails)
+            {
+                await _emailService.SendEmailAsync(e, $"Alert: Playing Status Change for Session {sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")}", EmailTemplate.PlayingStatusChangeNotification,
+                    new Dictionary<string, string> { { "EMAIL", e }, { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") }, { "SESSION_URL", sessionUrl }, { "FIRSTNAME", firstName }, { "LASTNAME", lastName }, { "PREVIOUSPLAYINGSTATUSSTRING", previousPlayingStatusString }, { "UPDATEDPLAYINGSTATUSSTRING", updatedPlayingStatusString } });
+            }
+
+            _logger.LogInformation($"CommsHandler->Successfully sent {notificationEmails.Count()} Playing Status Change emails for: {sessionDate}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"CommsHandler->Error sending Playing Status Change email for: {email}");
 
             throw;
         }

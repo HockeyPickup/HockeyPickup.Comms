@@ -34,6 +34,8 @@ public enum EmailTemplate
     AddedToRosterNotification,
     DeletedFromRoster,
     DeletedFromRosterNotification,
+    PlayingStatusChange,
+    PlayingStatusChangeNotification,
     // Add more as needed
 }
 
@@ -138,6 +140,15 @@ public class EmailService : IEmailService
                 EmailTemplate.DeletedFromRosterNotification,
                 ("deleted_from_roster_notification.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "FIRSTNAME", "LASTNAME", "SESSIONURL" })
             },
+            {
+                EmailTemplate.PlayingStatusChange,
+                ("playing_status_change.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "SESSION_URL", "FIRSTNAME", "LASTNAME", "PREVIOUSPLAYINGSTATUSSTRING", "UPDATEDPLAYINGSTATUSSTRING" })
+            },
+            {
+                EmailTemplate.PlayingStatusChangeNotification,
+                ("playing_status_change_notification.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "SESSION_URL", "FIRSTNAME", "PREVIOUSPLAYINGSTATUSSTRING", "UPDATEDPLAYINGSTATUSSTRING" })
+            },
+
         };
         alertEmail = Environment.GetEnvironmentVariable("SignInAlertEmail")!;
     }

@@ -135,7 +135,8 @@ public class MessageProcessor : IMessageProcessor
                 break;
 
             default:
-                throw new ArgumentException($"Unknown message type: {message.Metadata["Type"]}");
+                await ProcessGenericMessage(message);
+                break;
         }
     }
 

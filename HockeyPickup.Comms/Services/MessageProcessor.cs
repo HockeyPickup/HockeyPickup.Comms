@@ -610,8 +610,7 @@ public class MessageProcessor : IMessageProcessor
         var sessionDate = DateTime.Parse(message.MessageData["SessionDate"]);
         var sessionUrl = message.MessageData["SessionUrl"];
 
-        await _telegramBot.SendChannelMessageAsync($"Session: {sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")}. {sellerFirstName} {sellerLastName} Sold Spot to {buyerFirstName} {buyerLastName}."
-        );
+        await _telegramBot.SendChannelMessageAsync($"Session: {sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")}. {sellerFirstName} {sellerLastName} SOLD Spot to {buyerFirstName} {buyerLastName}.");
 
         await _commsHandler.SendBuyerSellerMatchedEmails(
             buyerEmail,

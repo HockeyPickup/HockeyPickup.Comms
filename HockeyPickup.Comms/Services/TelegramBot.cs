@@ -203,7 +203,7 @@ public class TelegramBot
     {
         try
         {
-            return await botClient.SendTextMessageAsync(chatId, text, null, ParseMode.None, null, null, disableNotification, false, false, null, null, null, null, cancellationToken);
+            return await botClient.SendMessage(chatId: chatId, text: text, parseMode: ParseMode.None, disableNotification: disableNotification, cancellationToken: cancellationToken);
         }
         catch (Exception e)
         {
@@ -216,7 +216,7 @@ public class TelegramBot
     {
         try
         {
-            return await botClient.SendTextMessageAsync($"@{TelegramRuntimeChannel}", text, null, ParseMode.None, null, null, disableNotification, false, false, null, null, null, null, default);
+            return await botClient.SendMessage(chatId: $"@{TelegramRuntimeChannel}", text: text, parseMode: ParseMode.None, disableNotification: disableNotification);
         }
         catch (Exception e)
         {

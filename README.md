@@ -59,9 +59,9 @@ To refresh the models, use `nswag`.
 
 Nswag is installed in this project as a `dotnet tool`.
 
-Local: `$ dotnet nswag swagger2csclient /client-language:csharp /input:https://localhost:7042/swagger/v1/swagger.json /output:HockeyPickup.Api.cs /namespace:HockeyPickup.Api`
+Local: `$ dotnet nswag openapi2csclient /input:https://localhost:7042/swagger/v1/swagger.json /output:HockeyPickup.Api.cs /namespace:HockeyPickup.Api`
 
-Production: `$ dotnet nswag swagger2csclient /client-language:csharp /input:https://api.hockeypickup.com/swagger/v1/swagger.json /output:HockeyPickup.Api.cs /namespace:HockeyPickup.Api`
+Production: `$ dotnet nswag openapi2csclient /input:https://api.hockeypickup.com/swagger/v1/swagger.json /output:HockeyPickup.Api.cs /namespace:HockeyPickup.Api`
 
 ## 🎁 Versioning
 

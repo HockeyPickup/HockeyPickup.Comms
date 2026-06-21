@@ -36,6 +36,9 @@ public enum EmailTemplate
     DeletedFromRosterNotification,
     PlayingStatusChange,
     PlayingStatusChangeNotification,
+    LotteryEntered,
+    LotteryEnteredNotification,
+    LotteryDrawCompleted,
     // Add more as needed
 }
 
@@ -147,6 +150,18 @@ public class EmailService : IEmailService
             {
                 EmailTemplate.PlayingStatusChangeNotification,
                 ("playing_status_change_notification.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "SESSION_URL", "FIRSTNAME", "PREVIOUSPLAYINGSTATUSSTRING", "UPDATEDPLAYINGSTATUSSTRING" })
+            },
+            {
+                EmailTemplate.LotteryEntered,
+                ("lottery_entered.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "FIRSTNAME", "LOTTERYCLASS", "DRAWDATETIME", "SESSIONURL" })
+            },
+            {
+                EmailTemplate.LotteryEnteredNotification,
+                ("lottery_entered_notification.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "FIRSTNAME", "LASTNAME", "LOTTERYCLASS", "SESSIONURL" })
+            },
+            {
+                EmailTemplate.LotteryDrawCompleted,
+                ("lottery_draw_completed.txt", new HashSet<string> { "EMAIL", "SESSIONDATE", "LOTTERYCLASS", "DRAWORDER", "SESSIONURL" })
             },
 
         };

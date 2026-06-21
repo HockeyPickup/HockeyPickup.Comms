@@ -18,6 +18,8 @@ public interface ICommsHandler
     Task SendAddedToRosterEmails(string email, NotificationPreference notificationPreference, ICollection<string> notificationEmails, DateTime sessionDate, string sessionUrl, string firstName, string lastName);
     Task SendDeletedFromRosterEmails(string email, NotificationPreference notificationPreference, ICollection<string> notificationEmails, DateTime sessionDate, string sessionUrl, string firstName, string lastName);
     Task SendProcessPlayingStatusChangeEmail(string email, NotificationPreference notificationPreference, ICollection<string> notificationEmails, DateTime sessionDate, string sessionUrl, string firstName, string lastName, string previousPlayingStatusString, string updatedPlayingStatusString);
+    Task SendLotteryEnteredEmails(string entrantEmail, NotificationPreference entrantNotificationPreference, ICollection<string> notificationEmails, DateTime sessionDate, string sessionUrl, string firstName, string lastName, string lotteryClass, DateTime drawDateTime);
+    Task SendLotteryDrawCompletedEmails(ICollection<string> entrantEmails, DateTime sessionDate, string sessionUrl, string lotteryClass, ICollection<string> drawnNames);
 }
 
 public class CommsHandler : ICommsHandler
@@ -532,6 +534,90 @@ public class CommsHandler : ICommsHandler
         catch (Exception ex)
         {
             _logger.LogError(ex, $"CommsHandler->Error sending deleted from roster emails");
+            throw;
+        }
+    }
+
+    public async Task SendLotteryEnteredEmails(string entrantEmail, NotificationPreference entrantNotificationPreference,
+        ICollection<string> notificationEmails, DateTime sessionDate, string sessionUrl,
+        string firstName, string lastName, string lotteryClass, DateTime drawDateTime)
+    {
+        try
+        {
+            // Confirmation email to the entrant
+            if (entrantNotificationPreference != NotificationPreference.None)
+            {
+                await _emailService.SendEmailAsync(
+                    entrantEmail,
+                    $"Entered the {lotteryClass} Lottery for {sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")}",
+                    EmailTemplate.LotteryEntered,
+                    new Dictionary<string, string>
+                    {
+                        { "EMAIL", entrantEmail },
+                        { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
+                        { "FIRSTNAME", firstName },
+                        { "LOTTERYCLASS", lotteryClass },
+                        { "DRAWDATETIME", drawDateTime.ToString("dddd, MM/dd/yyyy, HH:mm") },
+                        { "SESSIONURL", sessionUrl }
+                    }
+                );
+            }
+
+            // Notify everyone with NotificationPreference.All
+            foreach (var e in notificationEmails)
+            {
+                await _emailService.SendEmailAsync(
+                    e,
+                    $"Alert: New {lotteryClass} Lottery Entrant for {sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")}",
+                    EmailTemplate.LotteryEnteredNotification,
+                    new Dictionary<string, string>
+                    {
+                        { "EMAIL", e },
+                        { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
+                        { "FIRSTNAME", firstName },
+                        { "LASTNAME", lastName },
+                        { "LOTTERYCLASS", lotteryClass },
+                        { "SESSIONURL", sessionUrl }
+                    }
+                );
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"CommsHandler->Error sending lottery entered emails");
+            throw;
+        }
+    }
+
+    public async Task SendLotteryDrawCompletedEmails(ICollection<string> entrantEmails, DateTime sessionDate,
+        string sessionUrl, string lotteryClass, ICollection<string> drawnNames)
+    {
+        try
+        {
+            // Build the ordered-results list as HTML <li> items in drawn order
+            var drawOrderHtml = string.Concat(drawnNames.Select(n => $"<li>{n}</li>"));
+
+            // One results email to each entrant of this draw
+            foreach (var e in entrantEmails)
+            {
+                await _emailService.SendEmailAsync(
+                    e,
+                    $"Lottery Results for Session {sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")} — {lotteryClass}",
+                    EmailTemplate.LotteryDrawCompleted,
+                    new Dictionary<string, string>
+                    {
+                        { "EMAIL", e },
+                        { "SESSIONDATE", sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm") },
+                        { "LOTTERYCLASS", lotteryClass },
+                        { "DRAWORDER", drawOrderHtml },
+                        { "SESSIONURL", sessionUrl }
+                    }
+                );
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"CommsHandler->Error sending lottery draw completed emails");
             throw;
         }
     }

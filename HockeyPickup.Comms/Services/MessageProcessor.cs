@@ -26,6 +26,8 @@ public interface IMessageProcessor
     Task ProcessCancelledBuyQueue(ServiceBusCommsMessage message);
     Task ProcessCancelledSellQueue(ServiceBusCommsMessage message);
     Task ProcessPlayingStatusChange(ServiceBusCommsMessage message);
+    Task ProcessLotteryEntered(ServiceBusCommsMessage message);
+    Task ProcessLotteryDrawCompleted(ServiceBusCommsMessage message);
 
     bool ValidateAddedPaymentMethod(ServiceBusCommsMessage message, out string email, out NotificationPreference notificationPreference, out string firstName, out string lastName, out string paymentMethodType);
     bool ValidateSaveUser(ServiceBusCommsMessage message, out string email, out NotificationPreference notificationPreference, out string firstName, out string lastName);
@@ -40,6 +42,8 @@ public interface IMessageProcessor
     bool ValidateSellerMessage(ServiceBusCommsMessage message, out string sellerEmail, out NotificationPreference sellerNotificationPreference, out string sellerFirstName, out string sellerLastName, out string teamAssignment);
     bool ValidateBuySellMessage(ServiceBusCommsMessage message, out string buyerEmail, out NotificationPreference buyerNotificationPreference, out string sellerEmail, out NotificationPreference sellerNotificationPreference, out string buyerFirstName, out string buyerLastName, out string sellerFirstName, out string sellerLastName, out string teamAssignment);
     bool ValidateProcessPlayingStatusChange(ServiceBusCommsMessage message, out string email, out NotificationPreference notificationPreference, out string firstName, out string lastName, out DateTime sessionDate, out string sessionUrl, out bool previousPlayingStatus, out bool updatedPlayingStatus, out string note);
+    bool ValidateLotteryEntered(ServiceBusCommsMessage message, out string entrantEmail, out NotificationPreference notificationPreference, out string firstName, out string lastName, out string lotteryClass, out DateTime sessionDate, out string sessionUrl, out DateTime drawDateTime);
+    bool ValidateLotteryDrawCompleted(ServiceBusCommsMessage message, out string lotteryClass, out DateTime sessionDate, out string sessionUrl, out string drawOrderNames);
 }
 
 public class MessageProcessor : IMessageProcessor
@@ -141,6 +145,14 @@ public class MessageProcessor : IMessageProcessor
                 await ProcessPlayingStatusChange(message);
                 break;
 
+            case "LotteryEntered":
+                await ProcessLotteryEntered(message);
+                break;
+
+            case "LotteryDrawCompleted":
+                await ProcessLotteryDrawCompleted(message);
+                break;
+
             default:
                 await ProcessGenericMessage(message);
                 break;
@@ -154,6 +166,84 @@ public class MessageProcessor : IMessageProcessor
             $"MessageData:\r\n{JsonConvert.SerializeObject(message.MessageData, Formatting.Indented)}\r\n" +
             $"RelatedEntities:\r\n{JsonConvert.SerializeObject(message.RelatedEntities, Formatting.Indented)}"
         );
+    }
+
+    public async Task ProcessLotteryEntered(ServiceBusCommsMessage message)
+    {
+        if (!ValidateLotteryEntered(message, out var entrantEmail, out var notificationPreference, out var firstName, out var lastName, out var lotteryClass, out var sessionDate, out var sessionUrl, out var drawDateTime))
+        {
+            throw new ArgumentException("Required data missing for LotteryEntered message");
+        }
+
+        await _telegramBot.SendChannelMessageAsync($"Session: {sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")}. {firstName} {lastName} entered the {lotteryClass} lottery. Draw at {drawDateTime.ToString("dddd, MM/dd/yyyy, HH:mm")}.");
+
+        await _commsHandler.SendLotteryEnteredEmails(entrantEmail, notificationPreference, message.NotificationEmails, sessionDate, sessionUrl, firstName, lastName, lotteryClass, drawDateTime);
+    }
+
+    public bool ValidateLotteryEntered(ServiceBusCommsMessage message, out string EntrantEmail, out NotificationPreference NotificationPreference, out string FirstName, out string LastName, out string LotteryClass, out DateTime SessionDate, out string SessionUrl, out DateTime DrawDateTime)
+    {
+        try
+        {
+            EntrantEmail = message.CommunicationMethod["EntrantEmail"];
+            NotificationPreference = Enum.Parse<NotificationPreference>(message.CommunicationMethod["EntrantNotificationPreference"]);
+            FirstName = message.RelatedEntities["EntrantFirstName"];
+            LastName = message.RelatedEntities["EntrantLastName"];
+            LotteryClass = message.RelatedEntities["LotteryClass"];
+            SessionDate = DateTime.Parse(message.MessageData["SessionDate"]);
+            SessionUrl = message.MessageData["SessionUrl"];
+            DrawDateTime = DateTime.Parse(message.MessageData["DrawDateTime"]);
+        }
+        catch
+        {
+            EntrantEmail = string.Empty;
+            NotificationPreference = NotificationPreference.None;
+            FirstName = string.Empty;
+            LastName = string.Empty;
+            LotteryClass = string.Empty;
+            SessionDate = DateTime.MinValue;
+            SessionUrl = string.Empty;
+            DrawDateTime = DateTime.MinValue;
+            return false;
+        }
+
+        return true;
+    }
+
+    public async Task ProcessLotteryDrawCompleted(ServiceBusCommsMessage message)
+    {
+        if (!ValidateLotteryDrawCompleted(message, out var lotteryClass, out var sessionDate, out var sessionUrl, out var drawOrderNames))
+        {
+            throw new ArgumentException("Required data missing for LotteryDrawCompleted message");
+        }
+
+        var drawnNames = drawOrderNames
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToList();
+
+        await _telegramBot.SendChannelMessageAsync($"Session: {sessionDate.ToString("dddd, MM/dd/yyyy, HH:mm")}. {lotteryClass} lottery draw completed. Order: {string.Join(", ", drawnNames)}.");
+
+        await _commsHandler.SendLotteryDrawCompletedEmails(message.NotificationEmails, sessionDate, sessionUrl, lotteryClass, drawnNames);
+    }
+
+    public bool ValidateLotteryDrawCompleted(ServiceBusCommsMessage message, out string LotteryClass, out DateTime SessionDate, out string SessionUrl, out string DrawOrderNames)
+    {
+        try
+        {
+            LotteryClass = message.RelatedEntities["LotteryClass"];
+            SessionDate = DateTime.Parse(message.MessageData["SessionDate"]);
+            SessionUrl = message.MessageData["SessionUrl"];
+            DrawOrderNames = message.MessageData["DrawOrderNames"];
+        }
+        catch
+        {
+            LotteryClass = string.Empty;
+            SessionDate = DateTime.MinValue;
+            SessionUrl = string.Empty;
+            DrawOrderNames = string.Empty;
+            return false;
+        }
+
+        return true;
     }
 
     public async Task ProcessPlayingStatusChange(ServiceBusCommsMessage message)

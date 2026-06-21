@@ -11,6 +11,10 @@ HockeyPickup.Comms is an implementation of interacting with the HockeyPickup Pla
 
 The main technology stack platform is [.NET Core](https://dotnet.microsoft.com/) 9.0.
 
+## 🎟️ Lottery Queuing
+
+Comms handles the notifications for session lotteries: entry-confirmation and draw-results emails (with matching Telegram channel posts). It also runs a daily timer that calls the Api's `lottery/execute-due` sweep to execute any due or stuck draws.
+
 ## 🛠 Prerequisites
 
 * Install Visual Studio 2022 (preview) or later, or Visual Studio Code. Ensure that `$ dotnet --version` is at least 9.0.
